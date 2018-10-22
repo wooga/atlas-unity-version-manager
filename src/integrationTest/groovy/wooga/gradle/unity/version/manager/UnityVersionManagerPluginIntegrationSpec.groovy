@@ -17,7 +17,27 @@
 
 package wooga.gradle.unity.version.manager
 
-import nebula.test.IntegrationSpec
+import spock.lang.Unroll
 
 class UnityVersionManagerPluginIntegrationSpec extends IntegrationSpec {
+
+    def setup() {
+        buildFile << """
+            ${applyPlugin(UnityVersionManagerPlugin)}
+        """.stripIndent()
+    }
+
+    @Unroll
+    def "task :#taskName prints uvm version"() {
+        given: "default plugin setup"
+
+        expect:
+        runTasksSuccessfully(taskName).standardOutput.contains("uvm core version: ${expectedVersion}")
+
+        where:
+        taskName     | expectedVersion
+        "uvmVersion" | "0.0.1"
+    }
+
+
 }

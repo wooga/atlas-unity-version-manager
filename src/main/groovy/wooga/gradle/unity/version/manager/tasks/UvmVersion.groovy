@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Wooga GmbH
+ * Copyright 2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,16 @@
  *
  */
 
-rootProject.name = 'atlas-unity-version-manager'
-include(":jni")
-include(":jni:rust")
+package wooga.gradle.unity.version.manager.tasks
+
+import net.wooga.uvm.UnityVersionManager
+import org.gradle.api.DefaultTask
+import org.gradle.api.tasks.TaskAction
+
+class UvmVersion extends DefaultTask {
+
+    @TaskAction
+    protected void version() {
+        logger.info("uvm core version: {}", UnityVersionManager.uvmVersion())
+    }
+}

@@ -1,0 +1,11 @@
+[package]
+name = "uvm_jni"
+version = "0.0.1"
+authors = ["Manfred Endres <manfred.endres@tslarusso.de>"]
+
+[dependencies]
+jni = "0.10.2"
+uvm_core = "0.0.1"
+
+[lib]
+crate-type = ["cdylib"]

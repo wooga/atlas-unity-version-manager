@@ -15,6 +15,20 @@
  *
  */
 
-rootProject.name = 'atlas-unity-version-manager'
-include(":jni")
-include(":jni:rust")
+package net.wooga.uvm;
+
+import cz.adamh.utils.NativeUtils;
+import java.io.IOException;
+
+public class UnityVersionManager {
+
+    static {
+        try {
+            NativeUtils.loadLibraryFromJar("/native/" + System.mapLibraryName("uvm_jni"));
+        } catch (IOException e) {
+
+        }
+    }
+
+    public static native String uvmVersion();
+}

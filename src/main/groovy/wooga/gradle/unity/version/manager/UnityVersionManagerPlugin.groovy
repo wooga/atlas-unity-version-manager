@@ -21,6 +21,7 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.logging.Logger
 import org.gradle.api.logging.Logging
+import wooga.gradle.unity.version.manager.tasks.UvmVersion
 
 class UnityVersionManagerPlugin implements Plugin<Project> {
 
@@ -28,11 +29,6 @@ class UnityVersionManagerPlugin implements Plugin<Project> {
 
     @Override
     void apply(Project project) {
-        String osName = System.getProperty("os.name").toLowerCase()
-        if (!osName.contains("mac os")) {
-            logger.warn("This plugin is only supported on macOS.")
-            return
-        }
-
+        project.tasks.create("uvmVersion", UvmVersion)
     }
 }

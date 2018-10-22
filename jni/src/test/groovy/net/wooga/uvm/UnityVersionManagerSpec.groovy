@@ -15,30 +15,32 @@
  *
  */
 
-package wooga.gradle.unity.version.manager
+package net.wooga.uvm
 
-import nebula.test.ProjectSpec
-import org.gradle.api.DefaultTask
+import spock.lang.Specification
 import spock.lang.Unroll
 
-class UnityVersionManagerPluginSpec extends ProjectSpec {
-    public static final String PLUGIN_NAME = 'net.wooga.unity-version-manager'
+class UnityVersionManagerSpec extends Specification {
 
-    @Unroll("creates the task #taskName")
-    def 'Creates needed tasks'(String taskName, Class taskType) {
-        given:
-        assert !project.plugins.hasPlugin(PLUGIN_NAME)
-        assert !project.tasks.findByName(taskName)
-
+    @Unroll("can call :#method on UnityVersionManager")
+    def "unity version manager interface doesn't crash"() {
         when:
-        project.plugins.apply(PLUGIN_NAME)
+        (UnityVersionManager.class).invokeMethod(method, null)
 
         then:
-        def task = project.tasks.findByName(taskName)
-        taskType.isInstance(task)
+        noExceptionThrown()
 
         where:
-        taskName     | taskType
-        "uvmVersion" | DefaultTask
+        method       | _
+        "uvmVersion" | _
+    }
+
+    @Unroll
+    def "uvmVersion is #expectedVersion"() {
+        expect:
+        UnityVersionManager.uvmVersion() == expectedVersion
+
+        where:
+        expectedVersion = "0.0.1"
     }
 }
