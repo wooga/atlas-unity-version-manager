@@ -51,4 +51,12 @@ public class UnityVersionManager {
      * @return a version string or {@code NULL}
      */
     public static native String detectProjectVersion(File projectPath);
+
+    /**
+     * Returns the path to the installation location for the provided version or {@code Null}.
+     *
+     * @param unityVersion the version string to fetch the installation location for
+     * @return a path to the installation location or {@code Null}
+     */
+    public static native File locateUnityInstallation(String unityVersion);
 }
