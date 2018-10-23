@@ -15,6 +15,15 @@
  *
  */
 
-rootProject.name = 'atlas-unity-version-manager'
-include(":jni")
-include(":jni:rust")
+package wooga.gradle.unity.version.manager
+
+class IntegrationSpec extends nebula.test.IntegrationSpec{
+
+    def setup() {
+        def gradleVersion = System.getenv("GRADLE_VERSION")
+        if (gradleVersion) {
+            this.gradleVersion = gradleVersion
+            fork = true
+        }
+    }
+}

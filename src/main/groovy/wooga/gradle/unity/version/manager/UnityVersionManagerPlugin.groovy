@@ -21,6 +21,7 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.logging.Logger
 import org.gradle.api.logging.Logging
+import wooga.gradle.unity.version.manager.tasks.UvmVersion
 
 class UnityVersionManagerPlugin implements Plugin<Project> {
 
@@ -34,5 +35,6 @@ class UnityVersionManagerPlugin implements Plugin<Project> {
             return
         }
 
+        project.tasks.create("uvmVersion", UvmVersion)
     }
 }

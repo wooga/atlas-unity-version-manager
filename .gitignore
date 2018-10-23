@@ -1,5 +1,7 @@
 .gradle
+jni/rust/target/
 build/
+jni/out/**
 out/**
 .idea/**
 

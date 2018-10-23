@@ -16,35 +16,42 @@
  */
 
 plugins {
-    id 'net.wooga.plugins' version '1.1.0'
+    id 'java'
+    id 'groovy'
 }
 
-group 'net.wooga.gradle'
-description = "a unity version manager"
-
-pluginBundle {
-    website = 'https://wooga.github.io/atlas-unity/'
-    vcsUrl = 'https://github.com/wooga/atlas-unity'
-    tags = ['Unity3D']
-
-    plugins {
-        unityVersionManager {
-            id = 'net.wooga.unity-version-manager'
-            displayName = 'Gradle Unity version manager'
-            description = 'This plugin provides tasks to manage and downloads unity versions'
-        }
+configurations {
+    rustLib {
+        transitive = false
     }
-}
-
-github {
-    repositoryName = "wooga/atlas-unity-version-manager"
 }
 
 repositories {
     mavenCentral()
-    maven { url 'https://repo.gradle.org/gradle/libs-releases' }
 }
 
 dependencies {
-    compile project(':jni')
+    rustLib project('rust')
+
+    compile "org.codehaus.groovy:groovy-all:2.4.15"
+    testCompile "org.spockframework:spock-core:1.2-groovy-2.4"
 }
+
+task collectLibs() {
+    dependsOn configurations.rustLib
+
+    doLast {
+        configurations.rustLib.resolve().each { artifact ->
+            copy {
+                from { artifact }
+                into file("${buildDir}/rustLibs/native")
+            }
+        }
+    }
+}
+
+sourceSets.main.resources {
+    srcDir(file("${buildDir}/rustLibs"))
+}
+
+processResources.dependsOn(collectLibs)

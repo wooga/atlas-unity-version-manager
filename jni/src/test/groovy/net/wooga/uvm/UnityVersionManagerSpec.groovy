@@ -15,29 +15,32 @@
  *
  */
 
-package wooga.gradle.unity.version.manager
+package net.wooga.uvm
 
+import spock.lang.Specification
 import spock.lang.Unroll
 
-class UnityVersionManagerPluginIntegrationSpec extends IntegrationSpec {
+class UnityVersionManagerSpec extends Specification {
 
-    def setup() {
-        buildFile << """
-            ${applyPlugin(UnityVersionManagerPlugin)}
-        """.stripIndent()
+    @Unroll("can call :#method on UnityVersionManager")
+    def "unity version manager interface doesn't crash"() {
+        when:
+        (UnityVersionManager.class).invokeMethod(method, null)
+
+        then:
+        noExceptionThrown()
+
+        where:
+        method       | _
+        "uvmVersion" | _
     }
 
     @Unroll
-    def "task :#taskName prints uvm version"() {
-        given: "default plugin setup"
-
+    def "uvmVersion is #expectedVersion"() {
         expect:
-        runTasksSuccessfully(taskName).standardOutput.contains("uvm core version: ${expectedVersion}")
+        UnityVersionManager.uvmVersion() == expectedVersion
 
         where:
-        taskName     | expectedVersion
-        "uvmVersion" | "0.0.1"
+        expectedVersion = "0.0.1"
     }
-
-
 }
