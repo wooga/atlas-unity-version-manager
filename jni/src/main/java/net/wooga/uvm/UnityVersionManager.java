@@ -18,6 +18,8 @@
 package net.wooga.uvm;
 
 import cz.adamh.utils.NativeUtils;
+
+import java.io.File;
 import java.io.IOException;
 import java.util.logging.Logger;
 
@@ -41,4 +43,12 @@ public class UnityVersionManager {
      * Returns the uvm core library version.
      */
     public static native String uvmVersion();
+
+    /**
+     * Detects the unity editor version used in {@code projectPath}.
+     *
+     * @param projectPath the path to the unity project root
+     * @return a version string or {@code NULL}
+     */
+    public static native String detectProjectVersion(File projectPath);
 }

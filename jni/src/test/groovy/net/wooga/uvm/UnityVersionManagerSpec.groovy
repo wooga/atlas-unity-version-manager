@@ -25,14 +25,15 @@ class UnityVersionManagerSpec extends Specification {
     @Unroll("can call :#method on UnityVersionManager")
     def "unity version manager interface doesn't crash"() {
         when:
-        (UnityVersionManager.class).invokeMethod(method, null)
+        (UnityVersionManager.class).invokeMethod(method, *arguments)
 
         then:
         noExceptionThrown()
 
         where:
-        method       | _
-        "uvmVersion" | _
+        method                 | arguments
+        "uvmVersion"           | null
+        "detectProjectVersion" | [new File("")]
     }
 
     @Unroll
@@ -42,5 +43,31 @@ class UnityVersionManagerSpec extends Specification {
 
         where:
         expectedVersion = "0.0.1"
+    }
+
+    File mockUnityProject(String editorVersion) {
+        def outerDir = File.createTempDir("uvm_jni_projects_", "_base_path")
+        def projectDir = new File(outerDir, "unity_testproject")
+        def projectSettings = new File(projectDir, "ProjectSettings")
+        projectSettings.mkdirs()
+
+        def projectVersion = new File(projectSettings, "ProjectVersion.txt")
+        projectVersion << "m_EditorVersion: ${editorVersion}"
+        projectDir
+    }
+
+    @Unroll
+    def "detectProjectVersion returns #resultMessage when #reason"() {
+        expect:
+        UnityVersionManager.detectProjectVersion(path) == expectedResult
+
+        where:
+        path                                      | reason                                                  | expectedResult
+        null                                      | "path is null"                                          | null
+        File.createTempDir()                      | "path points to an invalid location"                    | null
+        mockUnityProject("2018.2b4")              | "editor version is invalid"                             | null
+        mockUnityProject("2018.2.1b4")            | "path points to a unity project location"               | "2018.2.1b4"
+        mockUnityProject("2017.1.2f3").parentFile | "path points to a directory containing a unity project" | "2017.1.2f3"
+        resultMessage = expectedResult ? "the editor version" : "null"
     }
 }

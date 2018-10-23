@@ -21,11 +21,14 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.logging.Logger
 import org.gradle.api.logging.Logging
+import wooga.gradle.unity.version.manager.internal.DefaultUnityVersionManagerExtension
 import wooga.gradle.unity.version.manager.tasks.UvmVersion
 
 class UnityVersionManagerPlugin implements Plugin<Project> {
 
     static Logger logger = Logging.getLogger(UnityVersionManagerPlugin)
+
+    static String EXTENSION_NAME = "uvm"
 
     @Override
     void apply(Project project) {
@@ -35,6 +38,10 @@ class UnityVersionManagerPlugin implements Plugin<Project> {
             return
         }
 
-        project.tasks.create("uvmVersion", UvmVersion)
+        def extension = project.extensions.create(UnityVersionManagerExtension,EXTENSION_NAME, DefaultUnityVersionManagerExtension, project)
+
+        project.tasks.create("uvmVersion", UvmVersion) {
+            uvmVersion.set(extension.version)
+        }
     }
 }

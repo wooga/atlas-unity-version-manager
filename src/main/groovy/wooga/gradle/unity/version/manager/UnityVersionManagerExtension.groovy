@@ -15,20 +15,27 @@
  *
  */
 
-package wooga.gradle.unity.version.manager.tasks
+package wooga.gradle.unity.version.manager
 
-import org.gradle.api.DefaultTask
-import org.gradle.api.provider.Property
-import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.TaskAction
+import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.provider.Provider
 
-class UvmVersion extends DefaultTask {
+interface UnityVersionManagerExtension {
 
-    @Input
-    final Property<String>uvmVersion = project.objects.property(String)
+    /**
+     * Returns the uvm core library version.
+     */
+    Provider<String> getVersion()
 
-    @TaskAction
-    protected void version() {
-        logger.info("uvm core version: {}", uvmVersion.get())
-    }
+    /**
+     * The unity editor version located at {@code getUnityProjectDir()}.
+     *
+     * @see #getUnityProjectDir()
+     */
+    Provider<String> getProjectVersion()
+
+    /**
+     * A {@code DirectoryProperty} pointing to a unity project.
+     */
+    DirectoryProperty getUnityProjectDir()
 }
