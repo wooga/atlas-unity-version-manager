@@ -50,6 +50,10 @@ task collectLibs() {
     }
 }
 
+tasks.withType(JavaCompile) {
+    options.compilerArgs += ["-h", file("${buildDir}/headers")]
+}
+
 sourceSets.main.resources {
     srcDir(file("${buildDir}/rustLibs"))
 }
