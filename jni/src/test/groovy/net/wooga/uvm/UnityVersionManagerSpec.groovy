@@ -31,9 +31,10 @@ class UnityVersionManagerSpec extends Specification {
         noExceptionThrown()
 
         where:
-        method                 | arguments
-        "uvmVersion"           | null
-        "detectProjectVersion" | [new File("")]
+        method                    | arguments
+        "uvmVersion"              | null
+        "detectProjectVersion"    | [new File("")]
+        "locateUnityInstallation" | null
     }
 
     @Unroll
@@ -56,6 +57,18 @@ class UnityVersionManagerSpec extends Specification {
         projectDir
     }
 
+    List<String> installedUnityVersions() {
+        def applications = new File("/Applications")
+        applications.listFiles(new FilenameFilter() {
+            @Override
+            boolean accept(File dir, String name) {
+                return name.startsWith("Unity-")
+            }
+        }).collect {
+            it.name.replace("Unity-", "")
+        }
+    }
+
     @Unroll
     def "detectProjectVersion returns #resultMessage when #reason"() {
         expect:
@@ -69,5 +82,23 @@ class UnityVersionManagerSpec extends Specification {
         mockUnityProject("2018.2.1b4")            | "path points to a unity project location"               | "2018.2.1b4"
         mockUnityProject("2017.1.2f3").parentFile | "path points to a directory containing a unity project" | "2017.1.2f3"
         resultMessage = expectedResult ? "the editor version" : "null"
+    }
+
+    @Unroll
+    def "locateUnityInstallation returns #resultMessage when #reason"() {
+        expect:
+        UnityVersionManager.locateUnityInstallation(version) == expectedResult
+
+        cleanup:
+        new File("/Applications/Unity-${version}").deleteDir()
+
+        where:
+        version                          | reason                          | expectedResult
+        null                             | "version is null"               | null
+        installedUnityVersions().first() | "when version is installed"     | new File("/Applications/Unity-${installedUnityVersions().first()}")
+        "1.1.1f1"                        | "when version is not installed" | null
+        "2018.0.1"                       | "when version is invalid"       | null
+
+        resultMessage = expectedResult ? "the unity location" : "null"
     }
 }
