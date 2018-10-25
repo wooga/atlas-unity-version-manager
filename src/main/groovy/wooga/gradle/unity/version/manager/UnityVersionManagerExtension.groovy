@@ -18,6 +18,7 @@
 package wooga.gradle.unity.version.manager
 
 import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 
 interface UnityVersionManagerExtension {
@@ -38,4 +39,15 @@ interface UnityVersionManagerExtension {
      * A {@code DirectoryProperty} pointing to a unity project.
      */
     DirectoryProperty getUnityProjectDir()
+
+    /**
+     * Enables autoswitch of unity installations.
+     *
+     * Only effects workspaces with {@code net.wooga.unity} plugins applied.
+     * If set to {@code true}, the plugin will switch the Unity path for
+     * {@code net.wooga.unity} to the located unity installation with the matching project version.
+     *
+     * @return {@code true} if autoswitching is enabled
+     */
+    Property<Boolean> getAutoSwitchUnityEditor()
 }

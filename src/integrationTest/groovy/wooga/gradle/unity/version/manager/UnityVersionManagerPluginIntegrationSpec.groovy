@@ -18,6 +18,8 @@
 package wooga.gradle.unity.version.manager
 
 import spock.lang.Unroll
+import wooga.gradle.unity.UnityPlugin
+import wooga.gradle.unity.tasks.Unity
 
 class UnityVersionManagerPluginIntegrationSpec extends IntegrationSpec {
 
@@ -40,4 +42,20 @@ class UnityVersionManagerPluginIntegrationSpec extends IntegrationSpec {
     }
 
 
+    def "creates hooks into atlas-unity when plugin is applied"() {
+        given: "a project with atlas-unity applied"
+        buildFile << """
+            ${applyPlugin(UnityPlugin)}
+
+            task(customUnity, type: ${Unity.name})
+
+        """.stripIndent()
+
+        when:
+        def result = runTasks("customUnity")
+
+        then:
+        result.wasExecuted("customUnity")
+        result.wasExecuted("checkUnityInstallation")
+    }
 }
