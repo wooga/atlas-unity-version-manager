@@ -2,12 +2,11 @@ atlas-unity-version-manager
 ===========================
 
 [![Gradle Plugin ID](https://img.shields.io/badge/gradle-net.wooga.unity--version--manager-brightgreen.svg?style=flat-square)](https://plugins.gradle.org/plugin/net.wooga.build-unity)
-[![Build Status](https://wooga-shields.herokuapp.com/jenkins/s/https/atlas-jenkins.wooga.com/job/atlas-plugins/job/atlas-untity-version-manager/job/master.svg?style=flat-square)]()
-[![Build Status](https://img.shields.io/travis/wooga/atlas-untity-version-manager/master.svg?style=flat-square)](https://travis-ci.org/wooga/atlas-untity-version-manager)
-[![Coveralls Status](https://img.shields.io/coveralls/wooga/atlas-untity-version-manager/master.svg?style=flat-square)](https://coveralls.io/github/wooga/atlas-untity-version-manager?branch=master)
-[![Apache 2.0](https://img.shields.io/badge/license-Apache%202-blue.svg?style=flat-square)](https://raw.githubusercontent.com/wooga/atlas-untity-version-manager/master/LICENSE)
-[![GitHub tag](https://img.shields.io/github/tag/wooga/atlas-untity-version-manager.svg?style=flat-square)]()
-[![GitHub release](https://img.shields.io/github/release/wooga/atlas-untity-version-manager.svg?style=flat-square)]()
+[![Build Status](https://wooga-shields.herokuapp.com/jenkins/s/https/atlas-jenkins.wooga.com/job/atlas-plugins/job/atlas-unity-version-manager/job/master.svg?style=flat-square)]()
+[![Coveralls Status](https://img.shields.io/coveralls/wooga/atlas-unity-version-manager/master.svg?style=flat-square)](https://coveralls.io/github/wooga/atlas-unity-version-manager?branch=master)
+[![Apache 2.0](https://img.shields.io/badge/license-Apache%202-blue.svg?style=flat-square)](https://raw.githubusercontent.com/wooga/atlas-unity-version-manager/master/LICENSE)
+[![GitHub tag](https://img.shields.io/github/tag/wooga/atlas-unity-version-manager.svg?style=flat-square)]()
+[![GitHub release](https://img.shields.io/github/release/wooga/atlas-unity-version-manager.svg?style=flat-square)]()
 
 A gradle plugin which provides tasks and bindings to manage and download [unity] editor versions.
 MacOS is the only supported platform at the moment.
