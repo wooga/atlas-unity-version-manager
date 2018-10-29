@@ -7,6 +7,7 @@ authors = ["Manfred Endres <manfred.endres@tslarusso.de>"]
 jni = "0.10.2"
 uvm_core = { git = "https://github.com/Larusso/unity-version-manager.git", branch="feature/unity-hub-support"}
 error-chain = "0.12.0"
+log = "0.4.6"
 
 [lib]
 crate-type = ["cdylib"]

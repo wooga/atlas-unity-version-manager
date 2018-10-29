@@ -17,16 +17,26 @@
 
 package net.wooga.uvm
 
+import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Unroll
 
+import java.nio.file.Files
+
 class UnityVersionManagerSpec extends Specification {
+
+    @Shared
+    def buildDir
+
+    def setup() {
+        buildDir = new File('build/unityVersionManagerSpec')
+        buildDir.mkdirs()
+    }
 
     @Unroll("can call :#method on UnityVersionManager")
     def "unity version manager interface doesn't crash"() {
         when:
         (UnityVersionManager.class).invokeMethod(method, *arguments)
-        ArrayList
         then:
         noExceptionThrown()
 
@@ -36,6 +46,17 @@ class UnityVersionManagerSpec extends Specification {
         "listInstallations"       | null
         "detectProjectVersion"    | [new File("")]
         "locateUnityInstallation" | null
+    }
+
+    def "can call :installUnityEditor on UnityVersionManager"() {
+        when:
+        UnityVersionManager.installUnityEditor(null, null)
+        then:
+        noExceptionThrown()
+        when:
+        UnityVersionManager.installUnityEditor(null, null, null)
+        then:
+        noExceptionThrown()
     }
 
     @Unroll
@@ -114,5 +135,61 @@ class UnityVersionManagerSpec extends Specification {
         v.each { version ->
             versions.contains(version)
         }
+    }
+
+    def "installUnityEditor installs unity to location"() {
+        given: "a version to install"
+        def version = "2017.1.0f1"
+        assert !UnityVersionManager.listInstallations().collect({it.version}).contains(version)
+
+        and: "a temp install location"
+        def basedir = Files.createTempDirectory(buildDir.toPath(),"installUnityEditor_without_components" ).toFile()
+        def destination = new File(basedir, version)
+        assert !destination.exists()
+
+        when:
+        def result = UnityVersionManager.installUnityEditor(version, destination)
+
+        then:
+        result != null
+        result.location.exists()
+        result.location == destination
+        result.version == version
+        UnityVersionManager.listInstallations().collect({it.version}).contains(version)
+
+        cleanup:
+        destination.deleteDir()
+    }
+
+    def "installUnityEditor installs unity and components to location"() {
+        given: "a version to install"
+        def version = "2017.1.0f1"
+        assert !UnityVersionManager.listInstallations().collect({it.version}).contains(version)
+
+        and: "a temp install location"
+        def basedir = Files.createTempDirectory(buildDir.toPath(),"installUnityEditor_with_components" ).toFile()
+        def destination = new File(basedir, version)
+        assert !destination.exists()
+
+        and: "no engines"
+        def playbackEngines = new File(destination, "PlaybackEngines")
+        assert !playbackEngines.exists()
+
+        when:
+        def result = UnityVersionManager.installUnityEditor(version, destination, [Component.android, Component.ios].toArray() as Component[])
+
+        then:
+        result != null
+        result.location.exists()
+        result.location == destination
+        result.version == version
+        UnityVersionManager.listInstallations().collect({it.version}).contains(version)
+        destination.exists()
+        playbackEngines.exists()
+        new File(playbackEngines, "iOSSupport").exists()
+        new File(playbackEngines, "AndroidPlayer").exists()
+
+        cleanup:
+        destination.deleteDir()
     }
 }

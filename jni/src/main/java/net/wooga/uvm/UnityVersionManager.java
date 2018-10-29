@@ -44,6 +44,11 @@ public class UnityVersionManager {
      */
     public static native String uvmVersion();
 
+    /**
+     * Lists Unity installations.
+     *
+     * @return an array of {@code Installation} or null
+     */
     public static native Installation[] listInstallations();
 
     /**
@@ -61,4 +66,30 @@ public class UnityVersionManager {
      * @return a path to the installation location or {@code Null}
      */
     public static native File locateUnityInstallation(String unityVersion);
+
+    /**
+     * Installs the given version of unity to destination.
+     *
+     * If the unity version is already installed, returns early.
+     *
+     * @param version the version of unity to install
+     * @param destination the location to install unity to
+     * @return a {@code Installation} object or null
+     */
+    public static native Installation installUnityEditor(String version, File destination);
+
+    /**
+     * Installs the given version of unity and additional components to destination.
+     *
+     * If the unity version and all requested components are already installed, returns early.
+     *
+     * @param version the version of unity to install
+     * @param destination the location to install unity to
+     * @param components a list of optional {@code Component}s to install
+     *
+     * @return a {@code Installation} object or null
+     * @see Component
+     * @see Installation
+     */
+    public static native Installation installUnityEditor(String version, File destination, Component[] components);
 }
