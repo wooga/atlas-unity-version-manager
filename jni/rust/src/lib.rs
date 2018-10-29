@@ -7,7 +7,7 @@ extern crate error_chain;
 use uvm_core::Version;
 use jni::JNIEnv;
 use jni::objects::{JClass, JObject, JValue, JString};
-use jni::sys::{jstring, jobject};
+use jni::sys::{jstring, jobject, jobjectArray, jsize};
 use std::path::{Path,PathBuf};
 use std::str::FromStr;
 
@@ -59,6 +59,31 @@ pub extern "system" fn Java_net_wooga_uvm_UnityVersionManager_uvmVersion(env: JN
     env.new_string(cargo_version!())
         .map(|s| s.into_inner() )
         .unwrap_or_else(|_| JObject::null().into_inner())
+}
+
+fn list_installations(env: &JNIEnv) -> error::UvmJniResult<jobjectArray> {
+    let installations = uvm_core::list_all_installations()?;
+    let installations:Vec<uvm_core::Installation> = installations.collect();
+    let installation_class = env.find_class("net/wooga/uvm/Installation")?;
+
+    let output = env.new_object_array(installations.len() as jsize,installation_class,JObject::null())?;
+    for (i, installation) in installations.iter().enumerate() {
+        let install_path = jni_utils::get_file(&env, installation.path())?;
+        let install_version = env.new_string(installation.version().to_string())?;
+        let native_installation = env.new_object(installation_class, "(Ljava/io/File;Ljava/lang/String;)V", &[JValue::Object(install_path.into()), JValue::Object(install_version.into())])?;
+        env.set_object_array_element(output, i as jsize, native_installation)?;
+    }
+
+    Ok(output)
+}
+
+#[no_mangle]
+#[allow(non_snake_case)]
+pub extern "system" fn Java_net_wooga_uvm_UnityVersionManager_listInstallations(env: JNIEnv, _class: JClass) -> jobjectArray {
+    list_installations(&env)
+        .unwrap_or_else(|_| {
+            JObject::null().into_inner()
+        })
 }
 
 #[no_mangle]

@@ -21,7 +21,7 @@ plugins {
 }
 
 rust {
-    executable version : '1.29.2'
+    executable version : '1.30.0'
     cargoToml './Cargo.toml'
     useCargoSourceLayout()
 }

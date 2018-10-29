@@ -44,6 +44,8 @@ public class UnityVersionManager {
      */
     public static native String uvmVersion();
 
+    public static native Installation[] listInstallations();
+
     /**
      * Detects the unity editor version used in {@code projectPath}.
      *
