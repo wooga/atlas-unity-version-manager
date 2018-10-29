@@ -22,6 +22,7 @@ import org.gradle.api.DefaultTask
 import org.junit.Rule
 import org.junit.contrib.java.lang.system.RestoreSystemProperties
 import spock.lang.Unroll
+import wooga.gradle.unity.version.manager.tasks.UvmListInstallations
 
 class UnityVersionManagerPluginSpec extends ProjectSpec {
     public static final String PLUGIN_NAME = 'net.wooga.unity-version-manager'
@@ -40,8 +41,9 @@ class UnityVersionManagerPluginSpec extends ProjectSpec {
         taskType.isInstance(task)
 
         where:
-        taskName     | taskType
-        "uvmVersion" | DefaultTask
+        taskName            | taskType
+        "uvmVersion"        | DefaultTask
+        "listInstallations" | UvmListInstallations
     }
 
     @Rule
@@ -49,7 +51,7 @@ class UnityVersionManagerPluginSpec extends ProjectSpec {
 
     def "doesn't apply anything on windows"() {
         given:
-        System.setProperty("os.name","windows")
+        System.setProperty("os.name", "windows")
 
         assert !project.plugins.hasPlugin(PLUGIN_NAME)
 

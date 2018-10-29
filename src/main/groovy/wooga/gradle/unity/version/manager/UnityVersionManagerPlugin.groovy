@@ -22,11 +22,11 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.logging.Logger
 import org.gradle.api.logging.Logging
-import org.gradle.api.plugins.AppliedPlugin
 import wooga.gradle.unity.UnityPlugin
 import wooga.gradle.unity.UnityPluginExtension
 import wooga.gradle.unity.tasks.internal.AbstractUnityTask
 import wooga.gradle.unity.version.manager.internal.DefaultUnityVersionManagerExtension
+import wooga.gradle.unity.version.manager.tasks.UvmListInstallations
 import wooga.gradle.unity.version.manager.tasks.UvmCheckInstallation
 import wooga.gradle.unity.version.manager.tasks.UvmVersion
 
@@ -49,6 +49,8 @@ class UnityVersionManagerPlugin implements Plugin<Project> {
         project.tasks.create("uvmVersion", UvmVersion) {
             uvmVersion.set(extension.version)
         }
+
+        project.tasks.create("listInstallations", UvmListInstallations)
 
         project.plugins.withType(UnityPlugin, new Action<UnityPlugin>() {
             @Override
