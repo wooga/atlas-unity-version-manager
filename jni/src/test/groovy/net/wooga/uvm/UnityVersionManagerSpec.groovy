@@ -26,13 +26,14 @@ class UnityVersionManagerSpec extends Specification {
     def "unity version manager interface doesn't crash"() {
         when:
         (UnityVersionManager.class).invokeMethod(method, *arguments)
-
+        ArrayList
         then:
         noExceptionThrown()
 
         where:
         method                    | arguments
         "uvmVersion"              | null
+        "listInstallations"       | null
         "detectProjectVersion"    | [new File("")]
         "locateUnityInstallation" | null
     }
@@ -89,9 +90,6 @@ class UnityVersionManagerSpec extends Specification {
         expect:
         UnityVersionManager.locateUnityInstallation(version) == expectedResult
 
-        cleanup:
-        new File("/Applications/Unity-${version}").deleteDir()
-
         where:
         version                          | reason                          | expectedResult
         null                             | "version is null"               | null
@@ -100,5 +98,21 @@ class UnityVersionManagerSpec extends Specification {
         "2018.0.1"                       | "when version is invalid"       | null
 
         resultMessage = expectedResult ? "the unity location" : "null"
+    }
+
+    @Unroll
+    def "listInstallations returns list of installed versions"() {
+        given: "some installed versions"
+        def v = installedUnityVersions()
+
+        when: "fetch installations"
+        def installations = UnityVersionManager.listInstallations()
+
+        then:
+        installations != null
+        def versions = installations.collect {it.version}
+        v.each { version ->
+            versions.contains(version)
+        }
     }
 }
