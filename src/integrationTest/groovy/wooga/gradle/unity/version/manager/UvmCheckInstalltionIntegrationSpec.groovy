@@ -114,4 +114,71 @@ class UvmCheckInstalltionIntegrationSpec extends IntegrationSpec {
         baseVersion = installedUnityVersions().last()
         message = autoSwitchEnabled ? "switches path to unity" : "keeps configured path to unity"
     }
+
+    @Unroll
+    def "task :checkUnityInstallation #message if autoInstallUnityEditor is #autoInstallEnabled and autoSwitchUnityEditor is #autoSwitchEnabled"() {
+        given: "A project with a mocked unity version"
+        unityProject.setProjectVersion(editorVersion)
+
+        and: "version switch and install enabled"
+        buildFile << """
+        uvm.autoSwitchUnityEditor = ${autoSwitchEnabled}
+        uvm.autoInstallUnityEditor = ${autoInstallEnabled}
+        """.stripIndent()
+
+        and: "and a custom set unity path no matching project version"
+        buildFile << """
+        unity.unityPath = file("/Applications/Unity-${baseVersion}/Unity.app/Contents/MacOS/Unity")
+        """.stripIndent()
+
+        when:
+        def result = runTasksSuccessfully("customUnity")
+
+        then:
+        if (autoSwitchEnabled && autoInstallEnabled) {
+            def expectedUnityPath = new File(projectDir, installPath)
+            result.standardOutput.contains(expectedUnityPath.path)
+        } else {
+            result.standardOutput.contains("/Applications/Unity-${baseVersion}/Unity.app/Contents/MacOS/Unity")
+        }
+
+        cleanup:
+        new File(projectDir, installPath).deleteDir()
+
+        where:
+        editorVersion | autoInstallEnabled | autoSwitchEnabled
+        "2017.1.0f1"  | false              | false
+        "2017.1.0f1"  | true               | false
+        "2017.1.0f1"  | false              | true
+        "2017.1.0f1"  | true               | true
+
+        installPath = "build/unity_installations/${editorVersion}"
+        baseVersion = installedUnityVersions().last()
+        message = (autoInstallEnabled && autoSwitchEnabled) ? "installs and switches version" : "uses default version"
+    }
+
+    def "task :checkUnityInstallation fails if version can't be installed"() {
+        given: "A project with a mocked unity version"
+        unityProject.setProjectVersion(editorVersion)
+
+        and: "version switch and install enabled"
+        buildFile << """
+        uvm.autoSwitchUnityEditor = true
+        uvm.autoInstallUnityEditor = true
+        """.stripIndent()
+
+        and: "and a custom set unity path no matching project version"
+        buildFile << """
+        unity.unityPath = file("/Applications/Unity-${baseVersion}/Unity.app/Contents/MacOS/Unity")
+        """.stripIndent()
+
+        expect:
+        def result = runTasksWithFailure("customUnity")
+        result.standardOutput.contains("Unable to install requested unity version ${editorVersion}")
+
+        where:
+        editorVersion = "2030.1.0f1"
+        baseVersion = installedUnityVersions().last()
+
+    }
 }

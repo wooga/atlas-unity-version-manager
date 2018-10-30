@@ -52,4 +52,16 @@ interface UnityVersionManagerExtension {
      * @return {@code true} if autoswitching is enabled
      */
     Property<Boolean> getAutoSwitchUnityEditor()
+
+    /**
+     * Enables autoinstall of unity if version is not installed.
+     *
+     * @return {@code true} if autoinstall is enabled
+     */
+    Property<Boolean> getAutoInstallUnityEditor()
+
+    /**
+     * @return the basedir to install unity versions into.
+     */
+    DirectoryProperty getUnityInstallBaseDir()
 }
