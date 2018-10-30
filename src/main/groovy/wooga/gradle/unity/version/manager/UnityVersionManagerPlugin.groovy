@@ -17,6 +17,7 @@
 
 package wooga.gradle.unity.version.manager
 
+import net.wooga.uvm.UnityVersionManager
 import org.gradle.api.Action
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -44,10 +45,10 @@ class UnityVersionManagerPlugin implements Plugin<Project> {
             return
         }
 
-        def extension = project.extensions.create(UnityVersionManagerExtension,EXTENSION_NAME, DefaultUnityVersionManagerExtension, project)
+        def extension = create_and_configure_extension(project)
 
         project.tasks.create("uvmVersion", UvmVersion) {
-            uvmVersion.set(extension.version)
+            uvmVersion.set(extension.uvmVersion)
         }
 
         project.tasks.create("listInstallations", UvmListInstallations)
@@ -59,6 +60,17 @@ class UnityVersionManagerPlugin implements Plugin<Project> {
             }
         })
 
+    }
+
+    protected static UnityVersionManagerExtension create_and_configure_extension(Project project) {
+        def extension = project.extensions.create(UnityVersionManagerExtension,EXTENSION_NAME, DefaultUnityVersionManagerExtension, project)
+        extension.unityProjectDir.set(project.layout.projectDirectory)
+        extension.autoSwitchUnityEditor.set(false)
+        extension.unityVersion.set(project.provider({
+            UnityVersionManager.detectProjectVersion(extension.unityProjectDir.get().asFile)
+        }))
+
+        extension
     }
 
     static void setupUnityHooks(Project project, UnityVersionManagerExtension extension) {
@@ -86,7 +98,7 @@ class UnityVersionManagerPlugin implements Plugin<Project> {
             @Override
             void execute(AbstractUnityTask unityTask) {
                 def checkInstallation = project.tasks.maybeCreate("checkUnityInstallation", UvmCheckInstallation)
-                checkInstallation.projectUnityVersion.set(extension.projectVersion)
+                checkInstallation.unityVersion.set(extension.unityVersion)
                 checkInstallation.autoSwitchUnityEditor.set(extension.autoSwitchUnityEditor)
                 checkInstallation.unityExtension.set(unity)
                 project.tasks[UnityPlugin.ACTIVATE_TASK_NAME].mustRunAfter checkInstallation

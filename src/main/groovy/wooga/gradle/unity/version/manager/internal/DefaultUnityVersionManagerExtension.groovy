@@ -26,21 +26,15 @@ import wooga.gradle.unity.version.manager.UnityVersionManagerExtension
 
 class DefaultUnityVersionManagerExtension implements UnityVersionManagerExtension {
 
-    final Provider<String> version
-    final Provider<String> projectVersion
+    final Provider<String> uvmVersion
+    final Property<String> unityVersion
     final DirectoryProperty unityProjectDir
     final Property<Boolean> autoSwitchUnityEditor
 
     DefaultUnityVersionManagerExtension(Project project) {
-        version = project.provider({ UnityVersionManager.uvmVersion()})
+        uvmVersion = project.provider({ UnityVersionManager.uvmVersion()})
         unityProjectDir = project.layout.directoryProperty()
-        unityProjectDir.set(project.layout.projectDirectory)
-
-        projectVersion = project.provider({
-            UnityVersionManager.detectProjectVersion(unityProjectDir.get().asFile)
-        })
-
+        unityVersion = project.objects.property(String)
         autoSwitchUnityEditor = project.objects.property(Boolean)
-        autoSwitchUnityEditor.set(false)
     }
 }
