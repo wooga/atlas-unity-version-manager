@@ -32,4 +32,32 @@ class UnityVersionManagerConsts {
      * @see UnityVersionManagerExtension#getAutoSwitchUnityEditor()
      */
     static String AUTO_SWITCH_UNITY_EDITOR_PATH_ENV_VAR = "UVM_AUTO_SWITCH_UNITY_EDITOR"
+
+    /**
+     * Gradle property name to set the default value for {@code autoInstallUnityEditor}.
+     * @value "uvm.autoInstallUnityEditor"
+     * @see UnityVersionManagerExtension#getAutoInstallUnityEditor()
+     */
+    static String AUTO_INSTALL_UNITY_EDITOR_OPTION = "uvm.autoInstallUnityEditor"
+
+    /**
+     * Environment variable name to set the default value for {@code autoInstallUnityEditor}.
+     * @value "UVM_AUTO_INSTALL_UNITY_EDITOR"
+     * @see UnityVersionManagerExtension#getAutoInstallUnityEditor()
+     */
+    static String AUTO_INSTALL_UNITY_EDITOR_PATH_ENV_VAR = "UVM_AUTO_INSTALL_UNITY_EDITOR"
+
+    /**
+     * Gradle property name to set the default value for {@code unityInstallBaseDir}.
+     * @value "uvm.unityInstallBaseDir"
+     * @see UnityVersionManagerExtension#getUnityInstallBaseDir()
+     */
+    static String UNITY_INSTALL_BASE_DIR_OPTION = "uvm.unityInstallBaseDir"
+
+    /**
+     * Environment variable name to set the default value for {@code unityInstallBaseDir}.
+     * @value "UVM_UNITY_INSTALL_BASE_DIR"
+     * @see UnityVersionManagerExtension#getUnityInstallBaseDir()
+     */
+    static String UNITY_INSTALL_BASE_DIR_PATH_ENV_VAR = "UVM_UNITY_INSTALL_BASE_DIR"
 }

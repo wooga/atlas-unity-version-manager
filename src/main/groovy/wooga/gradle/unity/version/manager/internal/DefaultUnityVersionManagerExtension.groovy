@@ -30,11 +30,15 @@ class DefaultUnityVersionManagerExtension implements UnityVersionManagerExtensio
     final Property<String> unityVersion
     final DirectoryProperty unityProjectDir
     final Property<Boolean> autoSwitchUnityEditor
+    final Property<Boolean> autoInstallUnityEditor
+    final DirectoryProperty unityInstallBaseDir
 
     DefaultUnityVersionManagerExtension(Project project) {
-        uvmVersion = project.provider({ UnityVersionManager.uvmVersion()})
+        uvmVersion = project.provider({ UnityVersionManager.uvmVersion() })
         unityProjectDir = project.layout.directoryProperty()
         unityVersion = project.objects.property(String)
         autoSwitchUnityEditor = project.objects.property(Boolean)
+        autoInstallUnityEditor = project.objects.property(Boolean)
+        unityInstallBaseDir = project.layout.directoryProperty()
     }
 }

@@ -27,8 +27,8 @@ import wooga.gradle.unity.UnityPlugin
 import wooga.gradle.unity.UnityPluginExtension
 import wooga.gradle.unity.tasks.internal.AbstractUnityTask
 import wooga.gradle.unity.version.manager.internal.DefaultUnityVersionManagerExtension
-import wooga.gradle.unity.version.manager.tasks.UvmListInstallations
 import wooga.gradle.unity.version.manager.tasks.UvmCheckInstallation
+import wooga.gradle.unity.version.manager.tasks.UvmListInstallations
 import wooga.gradle.unity.version.manager.tasks.UvmVersion
 
 class UnityVersionManagerPlugin implements Plugin<Project> {
@@ -63,11 +63,21 @@ class UnityVersionManagerPlugin implements Plugin<Project> {
     }
 
     protected static UnityVersionManagerExtension create_and_configure_extension(Project project) {
-        def extension = project.extensions.create(UnityVersionManagerExtension,EXTENSION_NAME, DefaultUnityVersionManagerExtension, project)
+        def extension = project.extensions.create(UnityVersionManagerExtension, EXTENSION_NAME, DefaultUnityVersionManagerExtension, project)
         extension.unityProjectDir.set(project.layout.projectDirectory)
         extension.autoSwitchUnityEditor.set(false)
+        extension.autoInstallUnityEditor.set(false)
         extension.unityVersion.set(project.provider({
             UnityVersionManager.detectProjectVersion(extension.unityProjectDir.get().asFile)
+        }))
+
+        extension.unityInstallBaseDir.set(project.provider({
+            String path = (project.properties[UnityVersionManagerConsts.UNITY_INSTALL_BASE_DIR_OPTION]
+                    ?: System.getenv()[UnityVersionManagerConsts.UNITY_INSTALL_BASE_DIR_PATH_ENV_VAR]) as String
+            if (!path) {
+                path = new File(project.buildDir, "unity_installations").path
+            }
+            return project.layout.projectDirectory.dir(path)
         }))
 
         extension
@@ -87,8 +97,19 @@ class UnityVersionManagerPlugin implements Plugin<Project> {
             String rawValue = (project.properties[UnityVersionManagerConsts.AUTO_SWITCH_UNITY_EDITOR_OPTION]
                     ?: System.getenv()[UnityVersionManagerConsts.AUTO_SWITCH_UNITY_EDITOR_PATH_ENV_VAR]) as String
 
-            if(rawValue) {
-                return (rawValue == "1" || rawValue .toLowerCase()== "yes" || rawValue .toLowerCase()== "y" || rawValue .toLowerCase()== "true")
+            if (rawValue) {
+                return (rawValue == "1" || rawValue.toLowerCase() == "yes" || rawValue.toLowerCase() == "y" || rawValue.toLowerCase() == "true")
+            }
+
+            false
+        }))
+
+        extension.autoInstallUnityEditor.set(project.provider({
+            String rawValue = (project.properties[UnityVersionManagerConsts.AUTO_INSTALL_UNITY_EDITOR_OPTION]
+                    ?: System.getenv()[UnityVersionManagerConsts.AUTO_INSTALL_UNITY_EDITOR_PATH_ENV_VAR]) as String
+
+            if (rawValue) {
+                return (rawValue == "1" || rawValue.toLowerCase() == "yes" || rawValue.toLowerCase() == "y" || rawValue.toLowerCase() == "true")
             }
 
             false
@@ -100,6 +121,8 @@ class UnityVersionManagerPlugin implements Plugin<Project> {
                 def checkInstallation = project.tasks.maybeCreate("checkUnityInstallation", UvmCheckInstallation)
                 checkInstallation.unityVersion.set(extension.unityVersion)
                 checkInstallation.autoSwitchUnityEditor.set(extension.autoSwitchUnityEditor)
+                checkInstallation.autoInstallUnityEditor.set(extension.autoInstallUnityEditor)
+                checkInstallation.unityInstallBaseDir.set(extension.unityInstallBaseDir)
                 checkInstallation.unityExtension.set(unity)
                 project.tasks[UnityPlugin.ACTIVATE_TASK_NAME].mustRunAfter checkInstallation
                 unityTask.dependsOn checkInstallation

@@ -19,6 +19,7 @@ package wooga.gradle.unity.version.manager.tasks
 
 import net.wooga.uvm.UnityVersionManager
 import org.gradle.api.DefaultTask
+import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Optional
@@ -37,10 +38,18 @@ class UvmCheckInstallation extends DefaultTask {
     @Input
     final Property<Boolean> autoSwitchUnityEditor
 
+    @Input
+    final Property<Boolean> autoInstallUnityEditor
+
+    @Input
+    final DirectoryProperty unityInstallBaseDir
+
     UvmCheckInstallation() {
         unityVersion = project.objects.property(String)
         unityExtension = project.objects.property(UnityPluginExtension)
         autoSwitchUnityEditor = project.objects.property(Boolean)
+        autoInstallUnityEditor = project.objects.property(Boolean)
+        unityInstallBaseDir = project.layout.directoryProperty()
     }
 
     @TaskAction
@@ -55,6 +64,13 @@ class UvmCheckInstallation extends DefaultTask {
 
         if (!location || !location.exists()) {
             logger.warn("unity version ${version} not installed")
+            if (autoSwitchUnityEditor.get() && autoInstallUnityEditor.get()) {
+                def installation = UnityVersionManager.installUnityEditor(version, new File(unityInstallBaseDir.get().asFile, version))
+                if(!installation) {
+                    logger.error("Unable to install requested unity version ${version}")
+                    throw new UvmInstallException("Unable to install requested unity version ${version}")
+                }
+            }
             return
         }
 
@@ -66,5 +82,11 @@ class UvmCheckInstallation extends DefaultTask {
         logger.info("update path to unity installtion ${location}")
         def extension = unityExtension.get()
         extension.unityPath = new File(location,"Unity.app/Contents/MacOS/Unity")
+    }
+}
+
+class UvmInstallException extends Exception {
+    UvmInstallException(String message) {
+        super(message)
     }
 }
