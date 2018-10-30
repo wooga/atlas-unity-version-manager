@@ -29,7 +29,7 @@ class UvmCheckInstallation extends DefaultTask {
 
     @Input
     @Optional
-    final Property<String> projectUnityVersion
+    final Property<String> unityVersion
 
     @Input
     final Property<UnityPluginExtension> unityExtension
@@ -38,19 +38,19 @@ class UvmCheckInstallation extends DefaultTask {
     final Property<Boolean> autoSwitchUnityEditor
 
     UvmCheckInstallation() {
-        projectUnityVersion = project.objects.property(String)
+        unityVersion = project.objects.property(String)
         unityExtension = project.objects.property(UnityPluginExtension)
         autoSwitchUnityEditor = project.objects.property(Boolean)
     }
 
     @TaskAction
     void checkInstalltion() {
-        if (!projectUnityVersion.present) {
+        if (!unityVersion.present) {
             logger.warn("no unity editor version found")
             return
         }
 
-        def version = projectUnityVersion.get()
+        def version = unityVersion.get()
         File location = UnityVersionManager.locateUnityInstallation(version)
 
         if (!location || !location.exists()) {

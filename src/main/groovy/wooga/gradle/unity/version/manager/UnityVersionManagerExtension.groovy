@@ -26,14 +26,16 @@ interface UnityVersionManagerExtension {
     /**
      * Returns the uvm core library version.
      */
-    Provider<String> getVersion()
+    Provider<String> getUvmVersion()
 
     /**
-     * The unity editor version located at {@code getUnityProjectDir()}.
+     * The unity editor version used for this project.
+     *
+     * Sets the unity version used for this project. The default value will be fetched from the unity project settings.
      *
      * @see #getUnityProjectDir()
      */
-    Provider<String> getProjectVersion()
+    Property<String> getUnityVersion()
 
     /**
      * A {@code DirectoryProperty} pointing to a unity project.
