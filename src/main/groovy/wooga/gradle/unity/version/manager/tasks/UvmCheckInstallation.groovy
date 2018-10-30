@@ -17,6 +17,7 @@
 
 package wooga.gradle.unity.version.manager.tasks
 
+import net.wooga.uvm.Installation
 import net.wooga.uvm.UnityVersionManager
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.DirectoryProperty
@@ -60,12 +61,12 @@ class UvmCheckInstallation extends DefaultTask {
         }
 
         def version = unityVersion.get()
-        File location = UnityVersionManager.locateUnityInstallation(version)
+        Installation installation = UnityVersionManager.locateUnityInstallation(version)
 
-        if (!location || !location.exists()) {
+        if (!installation || !installation.location.exists()) {
             logger.warn("unity version ${version} not installed")
             if (autoSwitchUnityEditor.get() && autoInstallUnityEditor.get()) {
-                def installation = UnityVersionManager.installUnityEditor(version, new File(unityInstallBaseDir.get().asFile, version))
+                installation = UnityVersionManager.installUnityEditor(version, new File(unityInstallBaseDir.get().asFile, version))
                 if(!installation) {
                     logger.error("Unable to install requested unity version ${version}")
                     throw new UvmInstallException("Unable to install requested unity version ${version}")
@@ -79,9 +80,9 @@ class UvmCheckInstallation extends DefaultTask {
             return
         }
 
-        logger.info("update path to unity installtion ${location}")
+        logger.info("update path to unity installtion ${installation.location}")
         def extension = unityExtension.get()
-        extension.unityPath = new File(location,"Unity.app/Contents/MacOS/Unity")
+        extension.unityPath = new File(installation.location,"Unity.app/Contents/MacOS/Unity")
     }
 }
 

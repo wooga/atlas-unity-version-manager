@@ -63,9 +63,9 @@ public class UnityVersionManager {
      * Returns the path to the installation location for the provided version or {@code Null}.
      *
      * @param unityVersion the version string to fetch the installation location for
-     * @return a path to the installation location or {@code Null}
+     * @return a {@code Installation} object or null
      */
-    public static native File locateUnityInstallation(String unityVersion);
+    public static native Installation locateUnityInstallation(String unityVersion);
 
     /**
      * Installs the given version of unity to destination.
