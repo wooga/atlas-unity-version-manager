@@ -114,7 +114,7 @@ class UnityVersionManagerSpec extends Specification {
         where:
         version                          | reason                          | expectedResult
         null                             | "version is null"               | null
-        installedUnityVersions().first() | "when version is installed"     | new File("/Applications/Unity-${installedUnityVersions().first()}")
+        installedUnityVersions().first() | "when version is installed"     | new Installation(new File("/Applications/Unity-${installedUnityVersions().first()}"), installedUnityVersions().first())
         "1.1.1f1"                        | "when version is not installed" | null
         "2018.0.1"                       | "when version is invalid"       | null
 
@@ -131,7 +131,7 @@ class UnityVersionManagerSpec extends Specification {
 
         then:
         installations != null
-        def versions = installations.collect {it.version}
+        def versions = installations.collect { it.version }
         v.each { version ->
             versions.contains(version)
         }
@@ -140,10 +140,10 @@ class UnityVersionManagerSpec extends Specification {
     def "installUnityEditor installs unity to location"() {
         given: "a version to install"
         def version = "2017.1.0f1"
-        assert !UnityVersionManager.listInstallations().collect({it.version}).contains(version)
+        assert !UnityVersionManager.listInstallations().collect({ it.version }).contains(version)
 
         and: "a temp install location"
-        def basedir = Files.createTempDirectory(buildDir.toPath(),"installUnityEditor_without_components" ).toFile()
+        def basedir = Files.createTempDirectory(buildDir.toPath(), "installUnityEditor_without_components").toFile()
         def destination = new File(basedir, version)
         assert !destination.exists()
 
@@ -155,7 +155,7 @@ class UnityVersionManagerSpec extends Specification {
         result.location.exists()
         result.location == destination
         result.version == version
-        UnityVersionManager.listInstallations().collect({it.version}).contains(version)
+        UnityVersionManager.listInstallations().collect({ it.version }).contains(version)
 
         cleanup:
         destination.deleteDir()
@@ -164,10 +164,10 @@ class UnityVersionManagerSpec extends Specification {
     def "installUnityEditor installs unity and components to location"() {
         given: "a version to install"
         def version = "2017.1.0f1"
-        assert !UnityVersionManager.listInstallations().collect({it.version}).contains(version)
+        assert !UnityVersionManager.listInstallations().collect({ it.version }).contains(version)
 
         and: "a temp install location"
-        def basedir = Files.createTempDirectory(buildDir.toPath(),"installUnityEditor_with_components" ).toFile()
+        def basedir = Files.createTempDirectory(buildDir.toPath(), "installUnityEditor_with_components").toFile()
         def destination = new File(basedir, version)
         assert !destination.exists()
 
@@ -183,7 +183,7 @@ class UnityVersionManagerSpec extends Specification {
         result.location.exists()
         result.location == destination
         result.version == version
-        UnityVersionManager.listInstallations().collect({it.version}).contains(version)
+        UnityVersionManager.listInstallations().collect({ it.version }).contains(version)
         destination.exists()
         playbackEngines.exists()
         new File(playbackEngines, "iOSSupport").exists()
