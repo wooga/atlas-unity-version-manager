@@ -60,4 +60,18 @@ class UnityVersionManagerConsts {
      * @see UnityVersionManagerExtension#getUnityInstallBaseDir()
      */
     static String UNITY_INSTALL_BASE_DIR_PATH_ENV_VAR = "UVM_UNITY_INSTALL_BASE_DIR"
+
+    /**
+     * Gradle property name to set the default value for {@code unityVersion}.
+     * @value "uvm.unityVersion"
+     * @see UnityVersionManagerExtension#getUnityVersion()
+     */
+    static String UNITY_VERSION_OPTION = "uvm.unityVersion"
+
+    /**
+     * Environment variable name to set the default value for {@code unityVersion}.
+     * @value "UVM_UNITY_VERSION"
+     * @see UnityVersionManagerExtension#getUnityVersion()
+     */
+    static String UNITY_VERSION_ENV_VAR = "UVM_UNITY_VERSION"
 }

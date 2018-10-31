@@ -77,10 +77,15 @@ class UnityVersionManagerPlugin implements Plugin<Project> {
     protected static UnityVersionManagerExtension create_and_configure_extension(Project project) {
         def extension = project.extensions.create(UnityVersionManagerExtension, EXTENSION_NAME, DefaultUnityVersionManagerExtension, project)
         extension.unityProjectDir.set(project.layout.projectDirectory)
-        extension.autoSwitchUnityEditor.set(false)
-        extension.autoInstallUnityEditor.set(false)
         extension.unityVersion.set(project.provider({
-            UnityVersionManager.detectProjectVersion(extension.unityProjectDir.get().asFile)
+            String version = (project.properties[UnityVersionManagerConsts.UNITY_VERSION_OPTION]
+                    ?: System.getenv()[UnityVersionManagerConsts.UNITY_VERSION_ENV_VAR]) as String
+
+            if(!version) {
+                version = UnityVersionManager.detectProjectVersion(extension.unityProjectDir.get().asFile)
+            }
+
+            version
         }))
 
         extension.unityInstallBaseDir.set(project.provider({
@@ -91,6 +96,30 @@ class UnityVersionManagerPlugin implements Plugin<Project> {
             }
             return project.layout.projectDirectory.dir(path)
         }))
+
+        extension.autoSwitchUnityEditor.set(project.provider({
+            String rawValue = (project.properties[UnityVersionManagerConsts.AUTO_SWITCH_UNITY_EDITOR_OPTION]
+                    ?: System.getenv()[UnityVersionManagerConsts.AUTO_SWITCH_UNITY_EDITOR_PATH_ENV_VAR]) as String
+
+            if (rawValue) {
+                return (rawValue == "1" || rawValue.toLowerCase() == "yes" || rawValue.toLowerCase() == "y" || rawValue.toLowerCase() == "true")
+            }
+
+            false
+        }))
+
+        extension.autoInstallUnityEditor.set(project.provider({
+            String rawValue = (project.properties[UnityVersionManagerConsts.AUTO_INSTALL_UNITY_EDITOR_OPTION]
+                    ?: System.getenv()[UnityVersionManagerConsts.AUTO_INSTALL_UNITY_EDITOR_PATH_ENV_VAR]) as String
+
+            if (rawValue) {
+                return (rawValue == "1" || rawValue.toLowerCase() == "yes" || rawValue.toLowerCase() == "y" || rawValue.toLowerCase() == "true")
+            }
+
+            false
+        }))
+
+
 
         extension
     }
@@ -129,28 +158,6 @@ class UnityVersionManagerPlugin implements Plugin<Project> {
             def projectDir = project.layout.directoryProperty()
             projectDir.set(project.file(unity.projectPath))
             projectDir.get()
-        }))
-
-        extension.autoSwitchUnityEditor.set(project.provider({
-            String rawValue = (project.properties[UnityVersionManagerConsts.AUTO_SWITCH_UNITY_EDITOR_OPTION]
-                    ?: System.getenv()[UnityVersionManagerConsts.AUTO_SWITCH_UNITY_EDITOR_PATH_ENV_VAR]) as String
-
-            if (rawValue) {
-                return (rawValue == "1" || rawValue.toLowerCase() == "yes" || rawValue.toLowerCase() == "y" || rawValue.toLowerCase() == "true")
-            }
-
-            false
-        }))
-
-        extension.autoInstallUnityEditor.set(project.provider({
-            String rawValue = (project.properties[UnityVersionManagerConsts.AUTO_INSTALL_UNITY_EDITOR_OPTION]
-                    ?: System.getenv()[UnityVersionManagerConsts.AUTO_INSTALL_UNITY_EDITOR_PATH_ENV_VAR]) as String
-
-            if (rawValue) {
-                return (rawValue == "1" || rawValue.toLowerCase() == "yes" || rawValue.toLowerCase() == "y" || rawValue.toLowerCase() == "true")
-            }
-
-            false
         }))
 
         project.tasks.withType(AbstractUnityProjectTask, new Action<AbstractUnityProjectTask>() {
