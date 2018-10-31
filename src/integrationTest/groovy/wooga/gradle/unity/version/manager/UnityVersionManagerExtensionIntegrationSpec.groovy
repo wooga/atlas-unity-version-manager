@@ -17,8 +17,10 @@
 
 package wooga.gradle.unity.version.manager
 
+import net.wooga.test.unity.ProjectGeneratorRule
 import org.junit.Rule
 import org.junit.contrib.java.lang.system.EnvironmentVariables
+import spock.lang.Shared
 import spock.lang.Unroll
 import wooga.gradle.unity.UnityPlugin
 
@@ -27,12 +29,20 @@ class UnityVersionManagerExtensionIntegrationSpec extends IntegrationSpec {
     @Rule
     public final EnvironmentVariables environmentVariables = new EnvironmentVariables();
 
+    @Rule
+    ProjectGeneratorRule unityProject = new ProjectGeneratorRule()
+
+    @Shared
+    String defaultProjectVersion = "2030.1.4f1"
 
     def setup() {
         buildFile << """
             ${applyPlugin(UnityVersionManagerPlugin)}
             ${applyPlugin(UnityPlugin)}
         """.stripIndent()
+
+        unityProject.setProjectVersion(defaultProjectVersion)
+        unityProject.projectDir = projectDir
     }
 
     enum PropertyLocation {
@@ -41,13 +51,13 @@ class UnityVersionManagerExtensionIntegrationSpec extends IntegrationSpec {
         String reason() {
             switch (this) {
                 case script:
-                    return "value provided in build script"
+                    return "value is provided in build script"
                 case property:
-                    return "value provided in properties"
+                    return "value is provided in properties"
                 case env:
-                    return "value provided in environment"
+                    return "value is provided in environment"
                 default:
-                    return "no value set"
+                    return "no value was configured"
             }
         }
     }
@@ -57,7 +67,7 @@ class UnityVersionManagerExtensionIntegrationSpec extends IntegrationSpec {
     }
 
     @Unroll
-    def "extension property :#property returns '#testValue' if #reason with value '#providedValue'"() {
+    def "extension property :#property returns '#testValue' if #reason"() {
         given:
         buildFile << """
             task(custom) {
@@ -84,6 +94,9 @@ class UnityVersionManagerExtensionIntegrationSpec extends IntegrationSpec {
             default:
                 break
         }
+
+        and: "a mocked unity project"
+        unityProject
 
         and: "the test value with replace placeholders"
         if (testValue instanceof String) {
@@ -132,8 +145,14 @@ class UnityVersionManagerExtensionIntegrationSpec extends IntegrationSpec {
         "unityInstallBaseDir"    | "/custom/path"         | _                                        | "path string" | PropertyLocation.property
         "unityInstallBaseDir"    | "file('/custom/path')" | "/custom/path"                           | "path string" | PropertyLocation.script
         "unityInstallBaseDir"    | null                   | "#projectDir#/build/unity_installations" | "null"        | PropertyLocation.none
+
+        "unityVersion"           | "2017.2.4f5"           | _                                        | "2017.2.4f5"  | PropertyLocation.env
+        "unityVersion"           | "2018.3.1b4"           | _                                        | "2018.3.1b4"  | PropertyLocation.property
+        "unityVersion"           | "'2019.2.1f1'"         | "2019.2.1f1"                             | "2019.2.1f1"  | PropertyLocation.script
+        "unityVersion"           | null                   | defaultProjectVersion                    | "null"        | PropertyLocation.none
+
         testValue = (expectedValue == _) ? value : expectedValue
-        reason = location.reason()
+        reason = location.reason() + ((location == PropertyLocation.none) ? "" : " with value '$providedValue'")
     }
 
 
