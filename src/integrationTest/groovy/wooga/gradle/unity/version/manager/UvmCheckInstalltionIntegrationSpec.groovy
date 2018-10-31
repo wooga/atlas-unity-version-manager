@@ -18,10 +18,13 @@
 package wooga.gradle.unity.version.manager
 
 import net.wooga.test.unity.ProjectGeneratorRule
+import net.wooga.uvm.Component
+import net.wooga.uvm.UnityVersionManager
 import org.junit.Rule
 import spock.lang.Requires
 import spock.lang.Unroll
 import wooga.gradle.unity.UnityPlugin
+import wooga.gradle.unity.batchMode.BuildTarget
 import wooga.gradle.unity.tasks.Unity
 
 @Requires({ os.macOs })
@@ -179,6 +182,100 @@ class UvmCheckInstalltionIntegrationSpec extends IntegrationSpec {
         where:
         editorVersion = "2030.1.0f1"
         baseVersion = installedUnityVersions().last()
+    }
+
+    @Unroll("task :checkUnityInstallation #message when task contains buildTarget: #buildTarget")
+    def "checkUnityInstallation installs missing components"() {
+        given: "A project with a mocked unity version"
+        unityProject.setProjectVersion(editorVersion)
+
+        and: "version switch and install enabled"
+        buildFile << """
+        uvm.autoSwitchUnityEditor = true
+        uvm.autoInstallUnityEditor = true
+        """.stripIndent()
+
+        and: "and a custom set unity path no matching project version"
+        buildFile << """
+        unity.unityPath = file("/Applications/Unity-${baseVersion}/Unity.app/Contents/MacOS/Unity")
+        """.stripIndent()
+
+        and: "and a unity installation without components"
+        def installation = UnityVersionManager.installUnityEditor(editorVersion, new File(projectDir, installPath))
+        assert installation
+
+        and: "a configured build target in unity task"
+        buildFile << "customUnity.buildTarget = '${buildTarget}'"
+
+        when:
+        runTasksSuccessfully("customUnity")
+
+        then:
+        if(expectedComponent) {
+            installation.components.contains(expectedComponent)
+        } else {
+            installation.components.size() == 0
+        }
+
+
+        cleanup:
+        new File(projectDir, installPath).deleteDir()
+
+        where:
+        editorVersion = "2017.1.0f1"
+        installPath = "build/unity_installations/${editorVersion}"
+        baseVersion = installedUnityVersions().last()
+        buildTarget << BuildTarget.values().toList()
+        expectedComponent << BuildTarget.values().collect {UnityVersionManagerPlugin.buildTargetToComponent(it)}
+        message = expectedComponent ? "installs missing component: ${expectedComponent}" : "installs no component"
+    }
+
+    def "task :checkUnityInstallation installs multiple missing components"() {
+        given: "A project with a mocked unity version"
+        unityProject.setProjectVersion(editorVersion)
+
+        and: "version switch and install enabled"
+        buildFile << """
+        uvm.autoSwitchUnityEditor = true
+        uvm.autoInstallUnityEditor = true
+        """.stripIndent()
+
+        and: "and a custom set unity path no matching project version"
+        buildFile << """
+        unity.unityPath = file("/Applications/Unity-${baseVersion}/Unity.app/Contents/MacOS/Unity")
+        """.stripIndent()
+
+        and: "and a unity installation without components"
+        def installation = UnityVersionManager.installUnityEditor(editorVersion, new File(projectDir, installPath))
+        assert installation
+
+        and: "multiple configured build targets in unity tasks"
+        buildFile << """
+            customUnity.buildTarget = '${buildTarget1}'
+
+            task(customUnity2, type: ${Unity.name}) {
+                buildTarget = '${buildTarget2}'
+            }
+        """
+
+        when:
+        runTasksSuccessfully("customUnity")
+
+        then:
+        installation.components.contains(expectedComponent1)
+        installation.components.contains(expectedComponent2)
+
+        cleanup:
+        new File(projectDir, installPath).deleteDir()
+
+        where:
+        editorVersion = "2017.1.0f1"
+        installPath = "build/unity_installations/${editorVersion}"
+        baseVersion = installedUnityVersions().last()
+        buildTarget1 = BuildTarget.ios
+        buildTarget2 = BuildTarget.android
+        expectedComponent1 = Component.ios
+        expectedComponent2 = Component.android
 
     }
 }

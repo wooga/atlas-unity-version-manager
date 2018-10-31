@@ -17,14 +17,17 @@
 
 package wooga.gradle.unity.version.manager.tasks
 
+import net.wooga.uvm.Component
 import net.wooga.uvm.Installation
 import net.wooga.uvm.UnityVersionManager
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.Property
+import org.gradle.api.provider.SetProperty
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.TaskAction
+import org.gradle.api.tasks.options.Option
 import wooga.gradle.unity.UnityPluginExtension
 
 class UvmCheckInstallation extends DefaultTask {
@@ -34,6 +37,7 @@ class UvmCheckInstallation extends DefaultTask {
     final Property<String> unityVersion
 
     @Input
+    @Optional
     final Property<UnityPluginExtension> unityExtension
 
     @Input
@@ -45,12 +49,16 @@ class UvmCheckInstallation extends DefaultTask {
     @Input
     final DirectoryProperty unityInstallBaseDir
 
+    @Input
+    final SetProperty<Component> buildRequiredUnityComponents
+
     UvmCheckInstallation() {
         unityVersion = project.objects.property(String)
         unityExtension = project.objects.property(UnityPluginExtension)
         autoSwitchUnityEditor = project.objects.property(Boolean)
         autoInstallUnityEditor = project.objects.property(Boolean)
         unityInstallBaseDir = project.layout.directoryProperty()
+        buildRequiredUnityComponents = project.objects.setProperty(Component)
     }
 
     @TaskAction
@@ -63,26 +71,45 @@ class UvmCheckInstallation extends DefaultTask {
         def version = unityVersion.get()
         Installation installation = UnityVersionManager.locateUnityInstallation(version)
 
-        if (!installation || !installation.location.exists()) {
+        boolean needInstall = false
+        if (!installation) {
             logger.warn("unity version ${version} not installed")
-            if (autoSwitchUnityEditor.get() && autoInstallUnityEditor.get()) {
-                installation = UnityVersionManager.installUnityEditor(version, new File(unityInstallBaseDir.get().asFile, version))
-                if(!installation) {
-                    logger.error("Unable to install requested unity version ${version}")
-                    throw new UvmInstallException("Unable to install requested unity version ${version}")
-                }
+            needInstall = true
+        } else {
+            def installedComponents = installation.components.toList().toSet()
+            def requiredComponents = buildRequiredUnityComponents.get()
+            if (!installedComponents.containsAll(requiredComponents)) {
+                def missing = requiredComponents - installedComponents
+                logger.warn("required components ${missing} not installed")
+                needInstall = true
             }
+        }
+
+        if (autoSwitchUnityEditor.get() && autoInstallUnityEditor.get() && needInstall) {
+            def destination = unityInstallBaseDir.file(version).get().asFile
+            def components = buildRequiredUnityComponents.get().toArray() as Component[]
+
+            installation = UnityVersionManager.installUnityEditor(version, destination, components)
+            if(!installation) {
+                logger.error("Unable to install requested unity version ${version}")
+                throw new UvmInstallException("Unable to install requested unity version ${version}")
+            }
+        }
+
+        if(!installation) {
             return
         }
 
-        if(!autoSwitchUnityEditor.get()) {
+        if (!autoSwitchUnityEditor.get()) {
             logger.info("auto switch editor is turned off")
             return
         }
 
-        logger.info("update path to unity installtion ${installation.location}")
-        def extension = unityExtension.get()
-        extension.unityPath = new File(installation.location,"Unity.app/Contents/MacOS/Unity")
+        if(unityExtension.present) {
+            logger.info("update path to unity installtion ${installation.location}")
+            def extension = unityExtension.get()
+            extension.unityPath = new File(installation.location,"Unity.app/Contents/MacOS/Unity")
+        }
     }
 }
 
