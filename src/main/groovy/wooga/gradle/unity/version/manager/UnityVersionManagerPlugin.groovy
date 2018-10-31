@@ -17,6 +17,7 @@
 
 package wooga.gradle.unity.version.manager
 
+import net.wooga.uvm.Component
 import net.wooga.uvm.UnityVersionManager
 import org.gradle.api.Action
 import org.gradle.api.Plugin
@@ -25,6 +26,8 @@ import org.gradle.api.logging.Logger
 import org.gradle.api.logging.Logging
 import wooga.gradle.unity.UnityPlugin
 import wooga.gradle.unity.UnityPluginExtension
+import wooga.gradle.unity.batchMode.BuildTarget
+import wooga.gradle.unity.tasks.internal.AbstractUnityProjectTask
 import wooga.gradle.unity.tasks.internal.AbstractUnityTask
 import wooga.gradle.unity.version.manager.internal.DefaultUnityVersionManagerExtension
 import wooga.gradle.unity.version.manager.tasks.UvmCheckInstallation
@@ -60,6 +63,15 @@ class UnityVersionManagerPlugin implements Plugin<Project> {
             }
         })
 
+        project.tasks.withType(UvmCheckInstallation, new Action<UvmCheckInstallation>() {
+            @Override
+            void execute(UvmCheckInstallation checkInstallation) {
+                checkInstallation.unityVersion.set(extension.unityVersion)
+                checkInstallation.autoSwitchUnityEditor.set(extension.autoSwitchUnityEditor)
+                checkInstallation.autoInstallUnityEditor.set(extension.autoInstallUnityEditor)
+                checkInstallation.unityInstallBaseDir.set(extension.unityInstallBaseDir)
+            }
+        })
     }
 
     protected static UnityVersionManagerExtension create_and_configure_extension(Project project) {
@@ -81,6 +93,32 @@ class UnityVersionManagerPlugin implements Plugin<Project> {
         }))
 
         extension
+    }
+
+    static Component buildTargetToComponent(BuildTarget buildTarget) {
+        Component component
+        switch (buildTarget) {
+            case BuildTarget.ios:
+                component = Component.ios
+                break
+            case BuildTarget.android:
+                component = Component.android
+                break
+            case BuildTarget.webgl:
+                component = Component.webGl
+                break
+            case BuildTarget.linux:
+            case BuildTarget.linux64:
+                component = Component.linux
+                break
+            case BuildTarget.win32:
+            case BuildTarget.win64:
+                component = Component.windows
+                break
+            default:
+                component = null
+        }
+        component
     }
 
     static void setupUnityHooks(Project project, UnityVersionManagerExtension extension) {
@@ -115,15 +153,15 @@ class UnityVersionManagerPlugin implements Plugin<Project> {
             false
         }))
 
-        project.tasks.withType(AbstractUnityTask, new Action<AbstractUnityTask>() {
+        project.tasks.withType(AbstractUnityProjectTask, new Action<AbstractUnityProjectTask>() {
             @Override
-            void execute(AbstractUnityTask unityTask) {
+            void execute(AbstractUnityProjectTask unityTask) {
                 def checkInstallation = project.tasks.maybeCreate("checkUnityInstallation", UvmCheckInstallation)
-                checkInstallation.unityVersion.set(extension.unityVersion)
-                checkInstallation.autoSwitchUnityEditor.set(extension.autoSwitchUnityEditor)
-                checkInstallation.autoInstallUnityEditor.set(extension.autoInstallUnityEditor)
-                checkInstallation.unityInstallBaseDir.set(extension.unityInstallBaseDir)
                 checkInstallation.unityExtension.set(unity)
+                checkInstallation.buildRequiredUnityComponents.set(project.provider {
+                    def tasks = project.tasks.withType(AbstractUnityProjectTask)
+                    tasks.collect { buildTargetToComponent(it.buildTarget) }.findAll {it != null}
+                })
                 project.tasks[UnityPlugin.ACTIVATE_TASK_NAME].mustRunAfter checkInstallation
                 unityTask.dependsOn checkInstallation
             }
