@@ -16,5 +16,3 @@
  */
 
 rootProject.name = 'atlas-unity-version-manager'
-include(":jni")
-include(":jni:rust")
