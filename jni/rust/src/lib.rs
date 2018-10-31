@@ -18,6 +18,7 @@ use std::str::FromStr;
 use std::collections::HashSet;
 use uvm_core::install::InstallVariant;
 use std::error::Error;
+use uvm_core::unity::Component;
 
 mod error {
     use jni;
@@ -67,6 +68,28 @@ mod jni_utils {
         let install_version = env.new_string(installation.version().to_string())?;
         let native_installation = env.new_object(installation_class, "(Ljava/io/File;Ljava/lang/String;)V", &[JValue::Object(install_path.into()), JValue::Object(install_version.into())])?;
         Ok(native_installation)
+    }
+
+    pub fn get_component<'a, 'b>(env: &'a JNIEnv<'b>, component: &'b Component) -> error::UvmJniResult<JObject<'a>> {
+        let component_class = env.find_class("net/wooga/uvm/Component")?;
+        let component_method = match component {
+            &Component::Android => "android",
+            &Component::Ios => "ios",
+            &Component::TvOs => "tvOs",
+            &Component::WebGl => "webGl",
+            &Component::Linux => "linux",
+            &Component::Windows => "windows",
+            &Component::WindowsMono => "windowsMono",
+            &Component::Editor => "editor",
+            &Component::Mono => "mono",
+            &Component::VisualStudio => "visualStudio",
+            &Component::MonoDevelop => "monoDevelop",
+            &Component::StandardAssets => "standardAssets",
+            &Component::Documentation => "documentation",
+        };
+        let native_component = env.get_static_field(component_class, component_method, "Lnet/wooga/uvm/Component;")?;
+        let native_component = native_component.l()?;
+        Ok(native_component)
     }
 
     pub fn print_error_and_return_null<E: Error>(err: E) -> jobject {
@@ -152,10 +175,10 @@ impl From<jint> for Variant {
         match component {
             0 => Variant(InstallVariant::Android),
             1 => Variant(InstallVariant::Ios),
-            2 => Variant(InstallVariant::WebGl),
-            3 => Variant(InstallVariant::Linux),
-            4 => Variant(InstallVariant::Windows),
-            5 => Variant(InstallVariant::WindowsMono),
+            3 => Variant(InstallVariant::WebGl),
+            4 => Variant(InstallVariant::Linux),
+            5 => Variant(InstallVariant::Windows),
+            6 => Variant(InstallVariant::WindowsMono),
             _ => Variant(InstallVariant::Android),
         }
     }
@@ -198,5 +221,32 @@ pub extern "system" fn Java_net_wooga_uvm_UnityVersionManager_installUnityEditor
 #[allow(non_snake_case)]
 pub extern "system" fn Java_net_wooga_uvm_UnityVersionManager_installUnityEditor__Ljava_lang_String_2Ljava_io_File_2_3Lnet_wooga_uvm_Component_2(env: JNIEnv, _class: JClass, version: JString, destination: JObject, components: jobjectArray) -> jobject {
     install_unity_editor(&env, version, destination, Some(components))
+        .unwrap_or_else(jni_utils::print_error_and_return_null)
+}
+
+fn get_installation_components(env: &JNIEnv, object: JObject) -> error::UvmJniResult<jobjectArray> {
+    let location = env.call_method(object, "getLocation", "()Ljava/io/File;", &[])?;
+    let location = location.l()?;
+    let path = jni_utils::get_path(&env, location)?;
+
+    let installation = uvm_core::unity::Installation::new(path)?;
+    let components = uvm_core::unity::InstalledComponents::new(installation);
+    let components: Vec<Component> = components.collect();
+    let component_class = env.find_class("net/wooga/uvm/Component")?;
+
+    let output = env.new_object_array(components.len() as jsize, component_class, JObject::null())?;
+    for (i, component) in components.iter().enumerate() {
+        let native_component = jni_utils::get_component(&env, &component)?;
+        env.set_object_array_element(output, i as jsize, native_component)?;
+    }
+
+    Ok(output)
+}
+
+
+#[no_mangle]
+#[allow(non_snake_case)]
+pub extern "system" fn Java_net_wooga_uvm_Installation_getComponents(env: JNIEnv, object: JObject) -> jobjectArray {
+    get_installation_components(&env, object)
         .unwrap_or_else(jni_utils::print_error_and_return_null)
 }

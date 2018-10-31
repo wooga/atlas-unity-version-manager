@@ -20,10 +20,17 @@ package net.wooga.uvm;
 public enum Component {
     android(0),
     ios(1),
-    webGl(2),
-    linux(3),
-    windows(4),
-    windowsMono(5);
+    tvOs(2),
+    webGl(3),
+    linux(4),
+    windows(5),
+    windowsMono(6),
+    Editor(7),
+    Mono(8),
+    visualStudio(9),
+    monoDevelop(10),
+    standardAssets(11),
+    documentation(12);
 
     Component(int value) {
         this.value = value;
