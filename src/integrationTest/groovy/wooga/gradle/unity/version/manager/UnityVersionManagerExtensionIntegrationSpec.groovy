@@ -18,16 +18,14 @@
 package wooga.gradle.unity.version.manager
 
 import net.wooga.test.unity.ProjectGeneratorRule
+import net.wooga.uvm.Component
 import org.junit.Rule
-import org.junit.contrib.java.lang.system.EnvironmentVariables
 import spock.lang.Shared
 import spock.lang.Unroll
 import wooga.gradle.unity.UnityPlugin
+import wooga.gradle.unity.tasks.Unity
 
 class UnityVersionManagerExtensionIntegrationSpec extends IntegrationSpec {
-
-    @Rule
-    public final EnvironmentVariables environmentVariables = new EnvironmentVariables();
 
     @Rule
     ProjectGeneratorRule unityProject = new ProjectGeneratorRule()
@@ -155,5 +153,57 @@ class UnityVersionManagerExtensionIntegrationSpec extends IntegrationSpec {
         reason = location.reason() + ((location == PropertyLocation.none) ? "" : " with value '$providedValue'")
     }
 
+    @Unroll("buildRequiredUnityComponentsProvider returns required components based on build state")
+    def "has provider object resolve unity components"() {
+        given: "a project with atlas-unity applied"
+        buildFile << """
+            ${applyPlugin(UnityPlugin)}
+            
+            uvm {
+                unityVersion = "${defaultProjectVersion}"
+            }
 
+            def componentsProvider = uvm.buildRequiredUnityComponentsProvider
+
+            task(customUnityIos, type: ${Unity.name}) {
+                buildTarget = 'ios'
+            }
+            
+            task(customUnityAndroid, type: ${Unity.name}) {
+                buildTarget = 'android'
+            }
+            
+            task(customUnityWebGl, type: ${Unity.name}) {
+                buildTarget = 'webGl'
+            }
+            
+            [customUnityIos, customUnityAndroid, customUnityWebGl].each {it.deleteAllActions()}
+            
+            task(printComponents) {                
+                println("print during task configuration: " + componentsProvider.get().sort())
+                                
+                doLast {
+                    println("print during task execution: " + componentsProvider.get().sort())
+                }
+            }
+        """.stripIndent()
+
+        when:
+        def result = runTasksSuccessfully("printComponents", *tasksToExecute)
+
+        then:
+
+        result.standardOutput.contains("print during task configuration: ${unfilteredComponentes.sort()}")
+
+
+        result.standardOutput.contains("print during task execution: ${expectedFilteredComponentes.sort()}")
+
+        where:
+        unfilteredComponentes                               | filteredComponentes                | tasksToExecute
+        [Component.ios, Component.android, Component.webGl] | _                                  | ["customUnityIos", "customUnityAndroid", "customUnityWebGl"]
+        [Component.ios, Component.android, Component.webGl] | [Component.ios, Component.android] | ["customUnityIos", "customUnityAndroid"]
+        [Component.ios, Component.android, Component.webGl] | [Component.ios]                    | ["customUnityIos"]
+
+        expectedFilteredComponentes = (filteredComponentes == _) ? unfilteredComponentes : filteredComponentes
+    }
 }

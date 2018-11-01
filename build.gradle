@@ -50,4 +50,5 @@ dependencies {
     compile "net.wooga:unity-version-manager-jni:0.1.0"
     compile "gradle.plugin.net.wooga.gradle:atlas-unity:1.+"
     testCompile 'net.wooga.test:unity-project-generator-rule:0.2.0'
+    testCompile 'com.github.stefanbirkner:system-rules:1.18.0'
 }

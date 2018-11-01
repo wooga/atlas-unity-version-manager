@@ -17,14 +17,21 @@
 
 package wooga.gradle.unity.version.manager.internal
 
+import net.wooga.uvm.Component
 import net.wooga.uvm.UnityVersionManager
 import org.gradle.api.Project
 import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.logging.Logger
+import org.gradle.api.logging.Logging
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
+import wooga.gradle.unity.tasks.internal.AbstractUnityProjectTask
 import wooga.gradle.unity.version.manager.UnityVersionManagerExtension
+import wooga.gradle.unity.version.manager.UnityVersionManagerPlugin
 
 class DefaultUnityVersionManagerExtension implements UnityVersionManagerExtension {
+
+    static Logger logger = Logging.getLogger(DefaultUnityVersionManagerExtension)
 
     final Provider<String> uvmVersion
     final Property<String> unityVersion
@@ -32,6 +39,7 @@ class DefaultUnityVersionManagerExtension implements UnityVersionManagerExtensio
     final Property<Boolean> autoSwitchUnityEditor
     final Property<Boolean> autoInstallUnityEditor
     final DirectoryProperty unityInstallBaseDir
+    final Provider<Set<Component>> buildRequiredUnityComponentsProvider
 
     DefaultUnityVersionManagerExtension(Project project) {
         uvmVersion = project.provider({ UnityVersionManager.uvmVersion() })
@@ -40,5 +48,22 @@ class DefaultUnityVersionManagerExtension implements UnityVersionManagerExtensio
         autoSwitchUnityEditor = project.objects.property(Boolean)
         autoInstallUnityEditor = project.objects.property(Boolean)
         unityInstallBaseDir = project.layout.directoryProperty()
+        buildRequiredUnityComponentsProvider = project.provider {
+            def tasks = project.tasks.withType(AbstractUnityProjectTask)
+
+            tasks.findAll {
+                try {
+                    return project.gradle.taskGraph.hasTask(it)
+                } catch (IllegalStateException ignored) {
+                    logger.warn("try to filter required build components to early. Filter not applied")
+                }
+                true
+            }.collect {
+                UnityVersionManagerPlugin.buildTargetToComponent(it.buildTarget)
+            }.findAll {
+                it != null
+            }.toSet()
+        }
+
     }
 }

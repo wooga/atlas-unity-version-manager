@@ -17,7 +17,13 @@
 
 package wooga.gradle.unity.version.manager
 
-class IntegrationSpec extends nebula.test.IntegrationSpec{
+import org.junit.Rule
+import org.junit.contrib.java.lang.system.EnvironmentVariables
+
+class IntegrationSpec extends nebula.test.IntegrationSpec {
+
+    @Rule
+    public final EnvironmentVariables environmentVariables = new EnvironmentVariables()
 
     def setup() {
         def gradleVersion = System.getenv("GRADLE_VERSION")
@@ -25,5 +31,12 @@ class IntegrationSpec extends nebula.test.IntegrationSpec{
             this.gradleVersion = gradleVersion
             fork = true
         }
+
+        environmentVariables.clear(
+                UnityVersionManagerConsts.UNITY_VERSION_ENV_VAR,
+                UnityVersionManagerConsts.UNITY_INSTALL_BASE_DIR_PATH_ENV_VAR,
+                UnityVersionManagerConsts.AUTO_INSTALL_UNITY_EDITOR_PATH_ENV_VAR,
+                UnityVersionManagerConsts.AUTO_SWITCH_UNITY_EDITOR_PATH_ENV_VAR
+        )
     }
 }
