@@ -28,7 +28,6 @@ import wooga.gradle.unity.UnityPlugin
 import wooga.gradle.unity.UnityPluginExtension
 import wooga.gradle.unity.batchMode.BuildTarget
 import wooga.gradle.unity.tasks.internal.AbstractUnityProjectTask
-import wooga.gradle.unity.tasks.internal.AbstractUnityTask
 import wooga.gradle.unity.version.manager.internal.DefaultUnityVersionManagerExtension
 import wooga.gradle.unity.version.manager.tasks.UvmCheckInstallation
 import wooga.gradle.unity.version.manager.tasks.UvmListInstallations
@@ -151,7 +150,6 @@ class UnityVersionManagerPlugin implements Plugin<Project> {
     }
 
     static void setupUnityHooks(Project project, UnityVersionManagerExtension extension) {
-
         //set the unity project dir to the configured value in UnityPluginExtension
         UnityPluginExtension unity = project.extensions.getByType(UnityPluginExtension)
         extension.unityProjectDir.set(project.provider({
@@ -165,10 +163,7 @@ class UnityVersionManagerPlugin implements Plugin<Project> {
             void execute(AbstractUnityProjectTask unityTask) {
                 def checkInstallation = project.tasks.maybeCreate("checkUnityInstallation", UvmCheckInstallation)
                 checkInstallation.unityExtension.set(unity)
-                checkInstallation.buildRequiredUnityComponents.set(project.provider {
-                    def tasks = project.tasks.withType(AbstractUnityProjectTask)
-                    tasks.collect { buildTargetToComponent(it.buildTarget) }.findAll {it != null}
-                })
+                checkInstallation.buildRequiredUnityComponents.set(extension.buildRequiredUnityComponentsProvider)
                 project.tasks[UnityPlugin.ACTIVATE_TASK_NAME].mustRunAfter checkInstallation
                 unityTask.dependsOn checkInstallation
             }

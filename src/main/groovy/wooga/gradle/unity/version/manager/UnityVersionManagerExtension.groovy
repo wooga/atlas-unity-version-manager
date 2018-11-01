@@ -17,6 +17,7 @@
 
 package wooga.gradle.unity.version.manager
 
+import net.wooga.uvm.Component
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
@@ -64,4 +65,17 @@ interface UnityVersionManagerExtension {
      * @return the basedir to install unity versions into.
      */
     DirectoryProperty getUnityInstallBaseDir()
+
+    /**
+     * A {@code Provider} object which resolves the required build components needed for the current build.
+     *
+     * This provider collects all tasks of type {@code AbstractUnityProjectTask} and filters tasks that
+     * are included in the {@code TaskExecutionGraph}. If the {@code TaskExecutionGraph} is not ready by the time
+     * this provider is resolved, the filter won't be applied and the {@code Set} of components configured in the
+     * whole build will be returned.
+     *
+     * @param project the gradle project
+     * @return A provider object which resolves the required build components needed for the current build.
+     */
+    Provider<Set<Component>> getBuildRequiredUnityComponentsProvider()
 }
