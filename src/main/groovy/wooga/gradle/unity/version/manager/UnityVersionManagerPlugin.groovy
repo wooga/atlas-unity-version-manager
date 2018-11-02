@@ -38,6 +38,10 @@ class UnityVersionManagerPlugin implements Plugin<Project> {
     static Logger logger = Logging.getLogger(UnityVersionManagerPlugin)
 
     static String EXTENSION_NAME = "uvm"
+    static String GROUP = "unity version manager"
+    static String LIST_INSTALLATIONS_TASK_NAME = "listInstallations"
+    static String UVM_VERSION_TASK_NAME = "uvmVersion"
+    static String CHECK_UNITY_INSTALLATION_TASK_NAME = "checkUnityInstallation"
 
     @Override
     void apply(Project project) {
@@ -49,11 +53,16 @@ class UnityVersionManagerPlugin implements Plugin<Project> {
 
         def extension = create_and_configure_extension(project)
 
-        project.tasks.create("uvmVersion", UvmVersion) {
+        project.tasks.create(UVM_VERSION_TASK_NAME, UvmVersion) {
+            group = GROUP
+            description = "prints the version of the unity version manager"
             uvmVersion.set(extension.uvmVersion)
         }
 
-        project.tasks.create("listInstallations", UvmListInstallations)
+        project.tasks.create(LIST_INSTALLATIONS_TASK_NAME, UvmListInstallations) {
+            group = GROUP
+            description = "lists all installed unity versions"
+        }
 
         project.plugins.withType(UnityPlugin, new Action<UnityPlugin>() {
             @Override
@@ -161,7 +170,7 @@ class UnityVersionManagerPlugin implements Plugin<Project> {
         project.tasks.withType(AbstractUnityProjectTask, new Action<AbstractUnityProjectTask>() {
             @Override
             void execute(AbstractUnityProjectTask unityTask) {
-                def checkInstallation = project.tasks.maybeCreate("checkUnityInstallation", UvmCheckInstallation)
+                def checkInstallation = project.tasks.maybeCreate(CHECK_UNITY_INSTALLATION_TASK_NAME, UvmCheckInstallation)
                 checkInstallation.unityExtension.set(unity)
                 checkInstallation.buildRequiredUnityComponents.set(extension.buildRequiredUnityComponentsProvider)
                 project.tasks[UnityPlugin.ACTIVATE_TASK_NAME].mustRunAfter checkInstallation
