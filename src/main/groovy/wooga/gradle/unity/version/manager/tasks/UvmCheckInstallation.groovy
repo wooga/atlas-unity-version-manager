@@ -27,7 +27,6 @@ import org.gradle.api.provider.SetProperty
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.TaskAction
-import org.gradle.api.tasks.options.Option
 import wooga.gradle.unity.UnityPluginExtension
 
 class UvmCheckInstallation extends DefaultTask {

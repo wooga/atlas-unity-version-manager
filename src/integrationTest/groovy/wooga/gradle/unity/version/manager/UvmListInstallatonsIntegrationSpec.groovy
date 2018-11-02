@@ -17,38 +17,52 @@
 
 package wooga.gradle.unity.version.manager
 
+import net.wooga.uvm.UnityVersionManager
+import spock.lang.Unroll
+
 class UvmListInstallatonsIntegrationSpec extends IntegrationSpec {
-
-    List<String> installedUnityVersions() {
-        def applications = new File("/Applications")
-        applications.listFiles(new FilenameFilter() {
-            @Override
-            boolean accept(File dir, String name) {
-                return name.startsWith("Unity-")
-            }
-        }).collect {
-            it.name.replace("Unity-", "")
-        }
-    }
-
     def setup() {
         buildFile << """
             ${applyPlugin(UnityVersionManagerPlugin)}
         """.stripIndent()
     }
 
-    def "lists versions"() {
+    @Unroll("task :#taskToRun #message #additionalOptions to #destination with options: #options")
+    def "list installed versions"() {
         given: "some installed versions"
-        def v = installedUnityVersions()
+        def v = UnityVersionManager.listInstallations().toList()
 
         when:
-        def result = runTasksSuccessfully("listInstallations")
+        def result = runTasksSuccessfully(taskToRun, *options)
 
         then:
-        result.standardOutput.contains("installations:")
-        v.each {
-            result.standardOutput.contains("${v} - ")
+        String out = (destination == "stdout") ? result.standardOutput : new File(projectDir, "build/installations.txt").text
+
+        out.contains("installations:")
+        v.every {
+            def format = expectedOutputFormat.replace("VERSION", it.version).replace("PATH", it.location.path)
+            out.contains(format)
         }
 
+        where:
+        taskToRun           | message                     | options                                                   | destination | additionalOptions | expectedOutputFormat
+        "listInstallations" | "prints installed versions" | []                                                        | "stdout"    | ""                | "VERSION"
+        "listInstallations" | "prints installed versions" | ["--print-path"]                                          | "stdout"    | "with path"       | "VERSION - PATH"
+        "listInstallations" | "prints installed versions" | ["--output-path=build/installations.txt"]                 | "to file"   | ""                | "VERSION"
+        "listInstallations" | "prints installed versions" | ["--print-path", "--output-path=build/installations.txt"] | "to file"   | "with path"       | "VERSION - PATH"
+    }
+
+    def "help prints commandline description for listInstallations"() {
+        when:
+        def result = runTasksSuccessfully("help", "--task", "listInstallations")
+
+        then:
+        result.standardOutput.contains("Path")
+        result.standardOutput.contains("Type")
+        result.standardOutput.contains("Options")
+        result.standardOutput.contains("--print-path")
+        result.standardOutput.contains("--output-path")
+        result.standardOutput.contains("Description")
+        result.standardOutput.contains("Group")
     }
 }
