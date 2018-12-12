@@ -22,6 +22,7 @@ import org.gradle.api.DefaultTask
 import org.junit.Rule
 import org.junit.contrib.java.lang.system.RestoreSystemProperties
 import spock.lang.Unroll
+import wooga.gradle.unity.version.manager.tasks.UvmInstallUnity
 import wooga.gradle.unity.version.manager.tasks.UvmListInstallations
 
 class UnityVersionManagerPluginSpec extends ProjectSpec {
@@ -44,6 +45,7 @@ class UnityVersionManagerPluginSpec extends ProjectSpec {
         taskName            | taskType
         "uvmVersion"        | DefaultTask
         "listInstallations" | UvmListInstallations
+        "installUnity"      | UvmInstallUnity
     }
 
     @Rule

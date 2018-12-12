@@ -30,6 +30,7 @@ import wooga.gradle.unity.batchMode.BuildTarget
 import wooga.gradle.unity.tasks.internal.AbstractUnityProjectTask
 import wooga.gradle.unity.version.manager.internal.DefaultUnityVersionManagerExtension
 import wooga.gradle.unity.version.manager.tasks.UvmCheckInstallation
+import wooga.gradle.unity.version.manager.tasks.UvmInstallUnity
 import wooga.gradle.unity.version.manager.tasks.UvmListInstallations
 import wooga.gradle.unity.version.manager.tasks.UvmVersion
 
@@ -42,6 +43,7 @@ class UnityVersionManagerPlugin implements Plugin<Project> {
     static String LIST_INSTALLATIONS_TASK_NAME = "listInstallations"
     static String UVM_VERSION_TASK_NAME = "uvmVersion"
     static String CHECK_UNITY_INSTALLATION_TASK_NAME = "checkUnityInstallation"
+    static String INSTALL_UNITY_TASK_NAME = "installUnity"
 
     @Override
     void apply(Project project) {
@@ -64,10 +66,22 @@ class UnityVersionManagerPlugin implements Plugin<Project> {
             description = "lists all installed unity versions"
         }
 
+        project.tasks.create(INSTALL_UNITY_TASK_NAME, UvmInstallUnity) {
+            group = GROUP
+        }
+
         project.plugins.withType(UnityPlugin, new Action<UnityPlugin>() {
             @Override
             void execute(UnityPlugin plugin) {
                 setupUnityHooks(project, extension)
+            }
+        })
+
+        project.tasks.withType(UvmInstallUnity, new Action<UvmInstallUnity>() {
+            @Override
+            void execute(UvmInstallUnity task) {
+                task.unityVersion.set(extension.unityVersion)
+                task.description = "installs a unity editor version and optional components"
             }
         })
 
