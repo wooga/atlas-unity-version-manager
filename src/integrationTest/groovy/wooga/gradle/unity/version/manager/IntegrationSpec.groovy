@@ -19,11 +19,15 @@ package wooga.gradle.unity.version.manager
 
 import org.junit.Rule
 import org.junit.contrib.java.lang.system.EnvironmentVariables
+import org.junit.contrib.java.lang.system.ProvideSystemProperty
 
 class IntegrationSpec extends nebula.test.IntegrationSpec {
 
     @Rule
     public final EnvironmentVariables environmentVariables = new EnvironmentVariables()
+
+    @Rule
+    ProvideSystemProperty properties = new ProvideSystemProperty("ignoreDeprecations", "true")
 
     def setup() {
         def gradleVersion = System.getenv("GRADLE_VERSION")
