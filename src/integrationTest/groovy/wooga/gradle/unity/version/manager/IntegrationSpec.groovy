@@ -21,6 +21,8 @@ import org.junit.Rule
 import org.junit.contrib.java.lang.system.EnvironmentVariables
 import org.junit.contrib.java.lang.system.ProvideSystemProperty
 
+import static groovy.json.StringEscapeUtils.escapeJava
+
 class IntegrationSpec extends nebula.test.IntegrationSpec {
 
     @Rule
@@ -42,5 +44,13 @@ class IntegrationSpec extends nebula.test.IntegrationSpec {
                 UnityVersionManagerConsts.AUTO_INSTALL_UNITY_EDITOR_PATH_ENV_VAR,
                 UnityVersionManagerConsts.AUTO_SWITCH_UNITY_EDITOR_PATH_ENV_VAR
         )
+    }
+
+    def escapedPath(String path) {
+        String osName = System.getProperty("os.name").toLowerCase()
+        if (osName.contains("windows")) {
+            return escapeJava(path)
+        }
+        path
     }
 }

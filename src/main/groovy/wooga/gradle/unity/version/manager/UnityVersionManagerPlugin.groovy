@@ -48,8 +48,8 @@ class UnityVersionManagerPlugin implements Plugin<Project> {
     @Override
     void apply(Project project) {
         String osName = System.getProperty("os.name").toLowerCase()
-        if (!osName.contains("mac os")) {
-            logger.warn("This plugin is only supported on macOS.")
+        if (!osName.contains("mac os") && !osName.contains("windows")) {
+            logger.warn("This plugin is only supported on macOS and windows.")
             return
         }
 

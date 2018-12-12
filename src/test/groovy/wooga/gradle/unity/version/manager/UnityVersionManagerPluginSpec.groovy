@@ -51,9 +51,10 @@ class UnityVersionManagerPluginSpec extends ProjectSpec {
     @Rule
     public final RestoreSystemProperties restoreSystemProperties = new RestoreSystemProperties();
 
-    def "doesn't apply anything on windows"() {
+    @Unroll
+    def "#message plugin on #platform"() {
         given:
-        System.setProperty("os.name", "windows")
+        System.setProperty("os.name", platform)
 
         assert !project.plugins.hasPlugin(PLUGIN_NAME)
 
@@ -61,6 +62,14 @@ class UnityVersionManagerPluginSpec extends ProjectSpec {
         project.plugins.apply(PLUGIN_NAME)
 
         then:
-        project.tasks.size() == 0
+        (project.tasks.size() > 0) == applies
+
+        where:
+        platform  | applies
+        "mac osx" | true
+        "windows" | true
+        "linux"   | false
+
+        message = (applies) ? "applies" : "doesn't apply"
     }
 }
