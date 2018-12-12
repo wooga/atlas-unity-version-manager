@@ -28,6 +28,7 @@ import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.TaskAction
 import wooga.gradle.unity.UnityPluginExtension
+import wooga.gradle.unity.version.manager.error.UvmInstallException
 
 class UvmCheckInstallation extends DefaultTask {
 
@@ -118,8 +119,3 @@ class UvmCheckInstallation extends DefaultTask {
     }
 }
 
-class UvmInstallException extends Exception {
-    UvmInstallException(String message) {
-        super(message)
-    }
-}
