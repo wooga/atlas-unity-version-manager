@@ -28,8 +28,8 @@ class UvmInstallUnityIntegrationSpec extends IntegrationSpec {
         """.stripIndent()
     }
 
-    @Unroll("task :#taskToRun installs unity version #version #components_message #destination_message with options: #options")
-    def "install unity versions to custom destination"() {
+    @Unroll("installs unity #components_message #destination_message")
+    def "task :#taskToRun installs unity version #version #components_message #destination_message with options: #options"() {
         given: "the destination exists"
         def destinationDir
         if (destination) {
@@ -60,17 +60,17 @@ class UvmInstallUnityIntegrationSpec extends IntegrationSpec {
         "installUnity" | "2017.1.0f1" | []                                 | "build/unity"
         "installUnity" | "2017.1.0f2" | [Component.android, Component.ios] | "build/unity"
         "installUnity" | "2017.1.0f3" | [Component.webGl]                  | "build/unity"
-//        "installUnity" | "2017.1.0f1" | []                                 | null
-//        "installUnity" | "2017.1.0f2" | [Component.android, Component.ios] | null
-//        "installUnity" | "2017.1.0f3" | [Component.webGl]                  | null
+//      "installUnity" | "2017.1.0f1" | []                                 | null
+//      "installUnity" | "2017.1.0f2" | [Component.android, Component.ios] | null
+//      "installUnity" | "2017.1.0f3" | [Component.webGl]                  | null
 
-        components_message = components.size() > 0 ? "with components ${components}" : "without components"
-        destination_message = destination ? "to custom destination" : "to default destination"
+        components_message = components.size() > 0 ? "with components" : ""
+        destination_message = destination ? "" : "to default destination"
         options = (components.collect({"--component=${it}"}) << ((destination) ? "--destination=${destination}" : "") << ((version) ? "--version=${version}" : "")).findAll({it != ""})
     }
 
-    @Unroll("task :#taskToRun installs unity version '#version' set in project #components_message #destination_message with options: #options")
-    def "install unity versions set in project to custom destination"() {
+    @Unroll("installs unity version set in project #components_message")
+    def "task :#taskToRun installs unity version '#version' set in project #components_message #destination_message with options: #options"() {
         given: "the destination exists"
         def destinationDir
         if (destination) {
@@ -106,12 +106,12 @@ class UvmInstallUnityIntegrationSpec extends IntegrationSpec {
         "installUnity" | "2017.1.0f1" | []                                 | "build/unity"
         "installUnity" | "2017.1.0f2" | [Component.android, Component.ios] | "build/unity"
         "installUnity" | "2017.1.0f3" | [Component.webGl]                  | "build/unity"
-//        "installUnity" | "2017.1.0f1" | []                                 | null
-//        "installUnity" | "2017.1.0f2" | [Component.android, Component.ios] | null
-//        "installUnity" | "2017.1.0f3" | [Component.webGl]                  | null
+//      "installUnity" | "2017.1.0f1" | []                                 | null
+//      "installUnity" | "2017.1.0f2" | [Component.android, Component.ios] | null
+//      "installUnity" | "2017.1.0f3" | [Component.webGl]                  | null
 
-        components_message = components.size() > 0 ? "with components ${components}" : "without components"
-        destination_message = destination ? "to custom destination" : "to default destination"
+        components_message = components.size() > 0 ? "with components" : ""
+        destination_message = destination ? "" : "to default destination"
         options = (components.collect({"--component=${it}"}) << ((destination) ? "--destination=${destination}" : "")).findAll({it != ""})
     }
 

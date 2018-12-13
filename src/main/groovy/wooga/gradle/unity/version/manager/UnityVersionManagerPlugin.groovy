@@ -47,13 +47,13 @@ class UnityVersionManagerPlugin implements Plugin<Project> {
 
     @Override
     void apply(Project project) {
+        def extension = create_and_configure_extension(project)
+
         String osName = System.getProperty("os.name").toLowerCase()
         if (!osName.contains("mac os") && !osName.contains("windows")) {
             logger.warn("This plugin is only supported on macOS and windows.")
             return
         }
-
-        def extension = create_and_configure_extension(project)
 
         project.tasks.create(UVM_VERSION_TASK_NAME, UvmVersion) {
             group = GROUP
@@ -164,7 +164,9 @@ class UnityVersionManagerPlugin implements Plugin<Project> {
                 break
             case BuildTarget.win32:
             case BuildTarget.win64:
-                component = Component.windows
+                if(!System.getProperty("os.name").toLowerCase().startsWith("windows")) {
+                    component = Component.windows
+                }
                 break
             default:
                 component = null

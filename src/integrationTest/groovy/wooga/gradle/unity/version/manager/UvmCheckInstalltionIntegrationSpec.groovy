@@ -42,60 +42,8 @@ class UvmCheckInstalltionIntegrationSpec extends IntegrationSpec {
         unityProject.projectDir = projectDir
     }
 
-    static List<String> _installedUnityVersions
-
-    List<String> installedUnityVersions() {
-        if (_installedUnityVersions) {
-            return _installedUnityVersions
-        }
-
-        def applications = baseUnityPath()
-        _installedUnityVersions = applications.listFiles(new FilenameFilter() {
-            @Override
-            boolean accept(File dir, String name) {
-                return name.startsWith("Unity-")
-            }
-        }).collect {
-            it.name.replace("Unity-", "")
-        }
-    }
-
-    File baseUnityPath() {
-        if(isWindows()) {
-            new File("C:\\Program Files")
-        } else if (isMac()) {
-            new File("/Applications")
-        }
-    }
-
-    File unityExecutablePath() {
-        if(isWindows()) {
-            new File("Editor\\Unity.exe")
-        } else if( isMac()) {
-            new File("Unity.app/Contents/MacOS/Unity")
-        }
-    }
-
-    File unityVersion(String version) {
-        def base = new File(baseUnityPath(), "Unity-${version}")
-        new File(base, unityExecutablePath().path)
-    }
-
-    String pathToUnityVersion(String version) {
-        escapedPath(unityVersion(version).absolutePath)
-    }
-
-    static String OS = System.getProperty("os.name").toLowerCase()
-    static boolean isWindows() {
-        return (OS.indexOf("win") >= 0)
-    }
-
-    static boolean isMac() {
-        return (OS.indexOf("mac") >= 0)
-    }
-
-    @Unroll
-    def "#message and autoSwitchUnityEditor is true"() {
+    @Unroll("#message and autoSwitchUnityEditor is true")
+    def "task :checkUnityInstallation #message and autoSwitchUnityEditor is true"() {
         given: "A project with a mocked unity version"
         unityProject.setProjectVersion(editorVersion)
 
@@ -122,8 +70,8 @@ class UvmCheckInstalltionIntegrationSpec extends IntegrationSpec {
         message = "keeps configured path when unity is not found"
     }
 
-    @Unroll
-    def "#message if autoSwitchUnityEditor is #autoSwitchEnabled"() {
+    @Unroll("#message if autoSwitchUnityEditor is #autoSwitchEnabled")
+    def "task :checkUnityInstallation #message if autoSwitchUnityEditor is #autoSwitchEnabled"() {
         given: "A project with a mocked unity version"
         unityProject.setProjectVersion(editorVersion)
 
@@ -151,8 +99,8 @@ class UvmCheckInstalltionIntegrationSpec extends IntegrationSpec {
         message = autoSwitchEnabled ? "switches path to unity" : "keeps configured path to unity"
     }
 
-    @Unroll
-    def "#message if autoInstallUnityEditor is #autoInstallEnabled and autoSwitchUnityEditor is #autoSwitchEnabled"() {
+    @Unroll("#message if autoInstallUnityEditor is #autoInstallEnabled and autoSwitchUnityEditor is #autoSwitchEnabled")
+    def "task :checkUnityInstallation #message if autoInstallUnityEditor is #autoInstallEnabled and autoSwitchUnityEditor is #autoSwitchEnabled"() {
         given: "A project with a mocked unity version"
         unityProject.setProjectVersion(editorVersion)
 
@@ -193,7 +141,8 @@ class UvmCheckInstalltionIntegrationSpec extends IntegrationSpec {
         message = (autoInstallEnabled && autoSwitchEnabled) ? "installs & uses version" : "uses default version"
     }
 
-    def "fails if version can't be installed"() {
+    @Unroll("fails if version can't be installed")
+    def "task :checkUnityInstallation fails if version can't be installed"() {
         given: "A project with a mocked unity version"
         unityProject.setProjectVersion(editorVersion)
 
@@ -217,8 +166,8 @@ class UvmCheckInstalltionIntegrationSpec extends IntegrationSpec {
         baseVersion = installedUnityVersions().last()
     }
 
-    @Unroll("#message when task contains buildTarget: #buildTarget")
-    def "checkUnityInstallation installs missing components"() {
+    @Unroll("when: #buildTarget")
+    def "task :checkUnityInstallation #message when task contains buildTarget: #buildTarget"() {
         given: "A project with a mocked unity version"
         unityProject.setProjectVersion(editorVersion)
 
@@ -260,10 +209,11 @@ class UvmCheckInstalltionIntegrationSpec extends IntegrationSpec {
         baseVersion = installedUnityVersions().last()
         buildTarget << BuildTarget.values().toList()
         expectedComponent << BuildTarget.values().collect {UnityVersionManagerPlugin.buildTargetToComponent(it)}
-        message = expectedComponent ? "installs missing component: ${expectedComponent}" : "installs no component"
+        message = expectedComponent ? "installs: ${expectedComponent}" : "installs no component"
     }
 
-    def "installs multiple missing components"() {
+    @Unroll("installs missing components")
+    def "task :checkUnityInstallation installs multiple missing components"() {
         given: "A project with a mocked unity version"
         unityProject.setProjectVersion(editorVersion)
 
@@ -312,7 +262,8 @@ class UvmCheckInstalltionIntegrationSpec extends IntegrationSpec {
 
     }
 
-    def "installs only required components in current build"() {
+    @Unroll("installs required components")
+    def "task :checkUnityInstallation installs only required components in current build"() {
         given: "A project with a mocked unity version"
         unityProject.setProjectVersion(editorVersion)
 

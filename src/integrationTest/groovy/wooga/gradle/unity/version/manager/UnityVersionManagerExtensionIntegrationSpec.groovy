@@ -49,11 +49,11 @@ class UnityVersionManagerExtensionIntegrationSpec extends IntegrationSpec {
         String reason() {
             switch (this) {
                 case script:
-                    return "value is provided in build script"
+                    return "value is provided in script"
                 case property:
-                    return "value is provided in properties"
+                    return "value is provided in props"
                 case env:
-                    return "value is provided in environment"
+                    return "value is set in env"
                 default:
                     return "no value was configured"
             }
@@ -64,7 +64,7 @@ class UnityVersionManagerExtensionIntegrationSpec extends IntegrationSpec {
         "UVM_${property.replaceAll(/([A-Z])/, "_\$1").toUpperCase()}"
     }
 
-    @Unroll
+    @Unroll(":#property returns '#testValue' if #reason")
     def "extension property :#property returns '#testValue' if #reason"() {
         given:
         buildFile << """
@@ -79,12 +79,14 @@ class UnityVersionManagerExtensionIntegrationSpec extends IntegrationSpec {
         and: "a gradle.properties"
         def propertiesFile = createFile("gradle.properties")
 
+        def escapedValue = (value instanceof String) ? escapedPath(value) : value
+
         switch (location) {
             case PropertyLocation.script:
-                buildFile << "uvm.${property} = ${value}"
+                buildFile << "uvm.${property} = ${escapedValue}"
                 break
             case PropertyLocation.property:
-                propertiesFile << "uvm.${property} = ${value}"
+                propertiesFile << "uvm.${property} = ${escapedValue}"
                 break
             case PropertyLocation.env:
                 environmentVariables.set(envNameFromProperty(property), "${value}")
@@ -98,7 +100,7 @@ class UnityVersionManagerExtensionIntegrationSpec extends IntegrationSpec {
 
         and: "the test value with replace placeholders"
         if (testValue instanceof String) {
-            testValue = testValue.replaceAll("#projectDir#", projectDir.path)
+            testValue = testValue.replaceAll("#projectDir#", escapedPath(projectDir.path))
         }
 
         when: ""
@@ -108,49 +110,47 @@ class UnityVersionManagerExtensionIntegrationSpec extends IntegrationSpec {
         result.standardOutput.contains("uvm.${property}: ${testValue}")
 
         where:
-        property                 | value                  | expectedValue                            | providedValue | location
-        "autoSwitchUnityEditor"  | true                   | _                                        | true          | PropertyLocation.env
-        "autoSwitchUnityEditor"  | true                   | _                                        | 1             | PropertyLocation.env
-        "autoSwitchUnityEditor"  | true                   | _                                        | 'TRUE'        | PropertyLocation.env
-        "autoSwitchUnityEditor"  | true                   | _                                        | 'y'           | PropertyLocation.env
-        "autoSwitchUnityEditor"  | true                   | _                                        | 'yes'         | PropertyLocation.env
-        "autoSwitchUnityEditor"  | true                   | _                                        | 'YES'         | PropertyLocation.env
-        "autoSwitchUnityEditor"  | true                   | _                                        | true          | PropertyLocation.property
-        "autoSwitchUnityEditor"  | true                   | _                                        | 1             | PropertyLocation.property
-        "autoSwitchUnityEditor"  | true                   | _                                        | 'TRUE'        | PropertyLocation.property
-        "autoSwitchUnityEditor"  | true                   | _                                        | 'y'           | PropertyLocation.property
-        "autoSwitchUnityEditor"  | true                   | _                                        | 'yes'         | PropertyLocation.property
-        "autoSwitchUnityEditor"  | true                   | _                                        | 'YES'         | PropertyLocation.property
-        "autoSwitchUnityEditor"  | true                   | _                                        | true          | PropertyLocation.script
-        "autoSwitchUnityEditor"  | false                  | _                                        | null          | PropertyLocation.none
+        property                 | value                                 | expectedValue                                      | providedValue | location
+        "autoSwitchUnityEditor"  | true                                  | _                                                  | true          | PropertyLocation.env
+        "autoSwitchUnityEditor"  | true                                  | _                                                  | 1             | PropertyLocation.env
+        "autoSwitchUnityEditor"  | true                                  | _                                                  | 'TRUE'        | PropertyLocation.env
+        "autoSwitchUnityEditor"  | true                                  | _                                                  | 'y'           | PropertyLocation.env
+        "autoSwitchUnityEditor"  | true                                  | _                                                  | 'yes'         | PropertyLocation.env
+        "autoSwitchUnityEditor"  | true                                  | _                                                  | 'YES'         | PropertyLocation.env
+        "autoSwitchUnityEditor"  | true                                  | _                                                  | true          | PropertyLocation.property
+        "autoSwitchUnityEditor"  | true                                  | _                                                  | 1             | PropertyLocation.property
+        "autoSwitchUnityEditor"  | true                                  | _                                                  | 'TRUE'        | PropertyLocation.property
+        "autoSwitchUnityEditor"  | true                                  | _                                                  | 'y'           | PropertyLocation.property
+        "autoSwitchUnityEditor"  | true                                  | _                                                  | 'yes'         | PropertyLocation.property
+        "autoSwitchUnityEditor"  | true                                  | _                                                  | 'YES'         | PropertyLocation.property
+        "autoSwitchUnityEditor"  | true                                  | _                                                  | true          | PropertyLocation.script
+        "autoSwitchUnityEditor"  | false                                 | _                                                  | null          | PropertyLocation.none
 
-        "autoInstallUnityEditor" | true                   | _                                        | true          | PropertyLocation.env
-        "autoInstallUnityEditor" | true                   | _                                        | 1             | PropertyLocation.env
-        "autoInstallUnityEditor" | true                   | _                                        | 'TRUE'        | PropertyLocation.env
-        "autoInstallUnityEditor" | true                   | _                                        | 'y'           | PropertyLocation.env
-        "autoInstallUnityEditor" | true                   | _                                        | 'yes'         | PropertyLocation.env
-        "autoInstallUnityEditor" | true                   | _                                        | 'YES'         | PropertyLocation.env
-        "autoInstallUnityEditor" | true                   | _                                        | true          | PropertyLocation.property
-        "autoInstallUnityEditor" | true                   | _                                        | 1             | PropertyLocation.property
-        "autoInstallUnityEditor" | true                   | _                                        | 'TRUE'        | PropertyLocation.property
-        "autoInstallUnityEditor" | true                   | _                                        | 'y'           | PropertyLocation.property
-        "autoInstallUnityEditor" | true                   | _                                        | 'yes'         | PropertyLocation.property
-        "autoInstallUnityEditor" | true                   | _                                        | 'YES'         | PropertyLocation.property
-        "autoInstallUnityEditor" | true                   | _                                        | true          | PropertyLocation.script
-        "autoInstallUnityEditor" | false                  | _                                        | null          | PropertyLocation.none
-
-        "unityInstallBaseDir"    | "/custom/path"         | _                                        | "path string" | PropertyLocation.env
-        "unityInstallBaseDir"    | "/custom/path"         | _                                        | "path string" | PropertyLocation.property
-        "unityInstallBaseDir"    | "file('/custom/path')" | "/custom/path"                           | "path string" | PropertyLocation.script
-        "unityInstallBaseDir"    | null                   | "#projectDir#/build/unity_installations" | "null"        | PropertyLocation.none
-
-        "unityVersion"           | "2017.2.4f5"           | _                                        | "2017.2.4f5"  | PropertyLocation.env
-        "unityVersion"           | "2018.3.1b4"           | _                                        | "2018.3.1b4"  | PropertyLocation.property
-        "unityVersion"           | "'2019.2.1f1'"         | "2019.2.1f1"                             | "2019.2.1f1"  | PropertyLocation.script
-        "unityVersion"           | null                   | defaultProjectVersion                    | "null"        | PropertyLocation.none
+        "autoInstallUnityEditor" | true                                  | _                                                  | true          | PropertyLocation.env
+        "autoInstallUnityEditor" | true                                  | _                                                  | 1             | PropertyLocation.env
+        "autoInstallUnityEditor" | true                                  | _                                                  | 'TRUE'        | PropertyLocation.env
+        "autoInstallUnityEditor" | true                                  | _                                                  | 'y'           | PropertyLocation.env
+        "autoInstallUnityEditor" | true                                  | _                                                  | 'yes'         | PropertyLocation.env
+        "autoInstallUnityEditor" | true                                  | _                                                  | 'YES'         | PropertyLocation.env
+        "autoInstallUnityEditor" | true                                  | _                                                  | true          | PropertyLocation.property
+        "autoInstallUnityEditor" | true                                  | _                                                  | 1             | PropertyLocation.property
+        "autoInstallUnityEditor" | true                                  | _                                                  | 'TRUE'        | PropertyLocation.property
+        "autoInstallUnityEditor" | true                                  | _                                                  | 'y'           | PropertyLocation.property
+        "autoInstallUnityEditor" | true                                  | _                                                  | 'yes'         | PropertyLocation.property
+        "autoInstallUnityEditor" | true                                  | _                                                  | 'YES'         | PropertyLocation.property
+        "autoInstallUnityEditor" | true                                  | _                                                  | true          | PropertyLocation.script
+        "autoInstallUnityEditor" | false                                 | _                                                  | null          | PropertyLocation.none
+        "unityInstallBaseDir"    | testPath("/custom/path")              | _                                                  | "path string" | PropertyLocation.env
+        "unityInstallBaseDir"    | testPath("/custom/path")              | _                                                  | "path string" | PropertyLocation.property
+        "unityInstallBaseDir"    | "file('${escapedPath(testPath("/custom/path"))}')" | testPath("/custom/path")                           | "path string" | PropertyLocation.script
+        "unityInstallBaseDir"    | null                                  | testPath("#projectDir#/build/unity_installations") | "null"        | PropertyLocation.none
+        "unityVersion"           | "2017.2.4f5"                          | _                                                  | "2017.2.4f5"  | PropertyLocation.env
+        "unityVersion"           | "2018.3.1b4"                          | _                                                  | "2018.3.1b4"  | PropertyLocation.property
+        "unityVersion"           | "'2019.2.1f1'"                        | "2019.2.1f1"                                       | "2019.2.1f1"  | PropertyLocation.script
+        "unityVersion"           | null                                  | defaultProjectVersion                              | "null"        | PropertyLocation.none
 
         testValue = (expectedValue == _) ? value : expectedValue
-        reason = location.reason() + ((location == PropertyLocation.none) ? "" : " with value '$providedValue'")
+        reason = location.reason() + ((location == PropertyLocation.none) ? "" : " with '$providedValue'")
     }
 
     @Unroll("buildRequiredUnityComponentsProvider returns required components based on build state")
