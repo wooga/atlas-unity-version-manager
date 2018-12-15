@@ -21,6 +21,8 @@ import org.junit.Rule
 import org.junit.contrib.java.lang.system.EnvironmentVariables
 import org.junit.contrib.java.lang.system.ProvideSystemProperty
 
+import static groovy.json.StringEscapeUtils.escapeJava
+
 class IntegrationSpec extends nebula.test.IntegrationSpec {
 
     @Rule
@@ -42,5 +44,78 @@ class IntegrationSpec extends nebula.test.IntegrationSpec {
                 UnityVersionManagerConsts.AUTO_INSTALL_UNITY_EDITOR_PATH_ENV_VAR,
                 UnityVersionManagerConsts.AUTO_SWITCH_UNITY_EDITOR_PATH_ENV_VAR
         )
+    }
+
+    static String escapedPath(String path) {
+        String osName = System.getProperty("os.name").toLowerCase()
+        if (osName.contains("windows")) {
+            return escapeJava(path)
+        }
+        path
+    }
+
+    static List<String> _installedUnityVersions
+
+    List<String> installedUnityVersions() {
+        if (_installedUnityVersions) {
+            return _installedUnityVersions
+        }
+
+        def applications = baseUnityPath()
+        _installedUnityVersions = applications.listFiles(new FilenameFilter() {
+            @Override
+            boolean accept(File dir, String name) {
+                return name.startsWith("Unity-")
+            }
+        }).collect {
+            it.name.replace("Unity-", "")
+        }
+    }
+
+    File baseUnityPath() {
+        if (isWindows()) {
+            new File("C:\\Program Files")
+        } else if (isMac()) {
+            new File("/Applications")
+        }
+    }
+
+    File unityExecutablePath() {
+        if (isWindows()) {
+            new File("Editor\\Unity.exe")
+        } else if (isMac()) {
+            new File("Unity.app/Contents/MacOS/Unity")
+        }
+    }
+
+    File unityVersion(String version) {
+        def base = new File(baseUnityPath(), "Unity-${version}")
+        new File(base, unityExecutablePath().path)
+    }
+
+    String pathToUnityVersion(String version) {
+        escapedPath(unityVersion(version).absolutePath)
+    }
+
+    static String OS = System.getProperty("os.name").toLowerCase()
+
+    static boolean isWindows() {
+        return (OS.indexOf("win") >= 0)
+    }
+
+    static boolean isMac() {
+        return (OS.indexOf("mac") >= 0)
+    }
+
+    static String testPath(String path) {
+        if (isWindows()) {
+            if (path.startsWith("/")) {
+                path =  "C:" + path
+            }
+
+            path = path.replace('/', '\\')
+        }
+
+        path
     }
 }

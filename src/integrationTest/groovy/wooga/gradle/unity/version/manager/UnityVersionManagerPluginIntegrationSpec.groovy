@@ -38,7 +38,7 @@ class UnityVersionManagerPluginIntegrationSpec extends IntegrationSpec {
 
         where:
         taskName     | expectedVersion
-        "uvmVersion" | "0.2.0"
+        "uvmVersion" | "0.2.2"
     }
 
 
