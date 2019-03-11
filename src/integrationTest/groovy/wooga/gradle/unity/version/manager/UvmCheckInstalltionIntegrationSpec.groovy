@@ -21,6 +21,7 @@ import net.wooga.test.unity.ProjectGeneratorRule
 import net.wooga.uvm.Component
 import net.wooga.uvm.UnityVersionManager
 import org.junit.Rule
+import spock.lang.IgnoreIf
 import spock.lang.Unroll
 import wooga.gradle.unity.UnityPlugin
 import wooga.gradle.unity.batchMode.BuildTarget
@@ -99,6 +100,7 @@ class UvmCheckInstalltionIntegrationSpec extends IntegrationSpec {
         message = autoSwitchEnabled ? "switches path to unity" : "keeps configured path to unity"
     }
 
+    @IgnoreIf({ System.getProperty("os.name").contains("windows") })
     @Unroll("#message if autoInstallUnityEditor is #autoInstallEnabled and autoSwitchUnityEditor is #autoSwitchEnabled")
     def "task :checkUnityInstallation #message if autoInstallUnityEditor is #autoInstallEnabled and autoSwitchUnityEditor is #autoSwitchEnabled"() {
         given: "A project with a mocked unity version"
