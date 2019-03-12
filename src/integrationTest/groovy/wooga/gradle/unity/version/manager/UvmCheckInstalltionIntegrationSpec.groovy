@@ -99,7 +99,8 @@ class UvmCheckInstalltionIntegrationSpec extends IntegrationSpec {
         message = autoSwitchEnabled ? "switches path to unity" : "keeps configured path to unity"
     }
 
-    @Unroll("#message if autoInstallUnityEditor is #autoInstallEnabled and autoSwitchUnityEditor is #autoSwitchEnabled")
+
+    @Unroll("#message")
     def "task :checkUnityInstallation #message if autoInstallUnityEditor is #autoInstallEnabled and autoSwitchUnityEditor is #autoSwitchEnabled"() {
         given: "A project with a mocked unity version"
         unityProject.setProjectVersion(editorVersion)

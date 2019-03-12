@@ -114,23 +114,8 @@ class UvmCheckInstallation extends DefaultTask {
         if(unityExtension.present) {
             logger.info("update path to unity installtion ${installation.location}")
             def extension = unityExtension.get()
-
-            //TODO fix these path after https://github.com/wooga/unity-version-manager-jni/issues/5 has been fixed
-            if (isWindows()) {
-                extension.unityPath = new File(installation.location, "Editor\\Unity.exe")
-            } else if (isMac()) {
-                extension.unityPath = new File(installation.location, "Unity.app/Contents/MacOS/Unity")
-            }
+            extension.unityPath = installation.executable
         }
-    }
-
-    static String OS = System.getProperty("os.name").toLowerCase()
-    static boolean isWindows() {
-        return (OS.indexOf("win") >= 0)
-    }
-
-    static boolean isMac() {
-        return (OS.indexOf("mac") >= 0)
     }
 }
 
