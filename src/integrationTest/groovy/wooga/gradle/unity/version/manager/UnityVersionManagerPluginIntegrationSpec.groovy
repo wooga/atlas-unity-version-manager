@@ -17,7 +17,7 @@
 
 package wooga.gradle.unity.version.manager
 
-import spock.lang.Unroll
+
 import wooga.gradle.unity.UnityPlugin
 import wooga.gradle.unity.tasks.Unity
 
@@ -28,19 +28,6 @@ class UnityVersionManagerPluginIntegrationSpec extends IntegrationSpec {
             ${applyPlugin(UnityVersionManagerPlugin)}
         """.stripIndent()
     }
-
-    @Unroll
-    def "task :#taskName prints uvm version"() {
-        given: "default plugin setup"
-
-        expect:
-        runTasksSuccessfully(taskName).standardOutput.contains("uvm core version: ${expectedVersion}")
-
-        where:
-        taskName     | expectedVersion
-        "uvmVersion" | "0.4.0"
-    }
-
 
     def "creates hooks into atlas-unity when plugin is applied"() {
         given: "a project with atlas-unity applied"
