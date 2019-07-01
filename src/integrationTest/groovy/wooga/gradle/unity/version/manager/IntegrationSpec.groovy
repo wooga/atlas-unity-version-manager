@@ -73,10 +73,12 @@ class IntegrationSpec extends nebula.test.IntegrationSpec {
     }
 
     File baseUnityPath() {
-        if (isWindows()) {
+        if(isWindows()) {
             new File("C:\\Program Files")
         } else if (isMac()) {
             new File("/Applications")
+        } else if (isLinux()) {
+            new File("${System.getenv('HOME')}/.local/share")
         }
     }
 
@@ -85,6 +87,8 @@ class IntegrationSpec extends nebula.test.IntegrationSpec {
             new File("Editor\\Unity.exe")
         } else if (isMac()) {
             new File("Unity.app/Contents/MacOS/Unity")
+        } else if (isLinux()) {
+            new File("Editor/Unity")
         }
     }
 
@@ -105,6 +109,10 @@ class IntegrationSpec extends nebula.test.IntegrationSpec {
 
     static boolean isMac() {
         return (OS.indexOf("mac") >= 0)
+    }
+
+    static boolean isLinux() {
+        return (OS.indexOf("linux") >= 0)
     }
 
     static String testPath(String path) {

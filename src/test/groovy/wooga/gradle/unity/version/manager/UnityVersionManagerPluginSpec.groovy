@@ -68,7 +68,8 @@ class UnityVersionManagerPluginSpec extends ProjectSpec {
         platform  | applies
         "mac osx" | true
         "windows" | true
-        "linux"   | false
+        "linux"   | true
+        "bsd"     | false
 
         message = (applies) ? "applies" : "doesn't apply"
     }
