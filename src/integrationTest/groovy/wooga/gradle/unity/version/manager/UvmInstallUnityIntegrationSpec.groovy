@@ -28,6 +28,14 @@ class UvmInstallUnityIntegrationSpec extends IntegrationSpec {
         """.stripIndent()
     }
 
+    static String unityTestVersion() {
+        if (isLinux()) {
+            return "2019.1.0b"
+        }
+
+        "2017.1.0f"
+    }
+
     @Unroll("installs unity #components_message #destination_message")
     def "task :#taskToRun installs unity version #version #components_message #destination_message with options: #options"() {
         given: "the destination exists"
@@ -56,17 +64,21 @@ class UvmInstallUnityIntegrationSpec extends IntegrationSpec {
         }
 
         where:
-        taskToRun      | version      | components                         | destination
-        "installUnity" | "2017.1.0f1" | []                                 | "build/unity"
-        "installUnity" | "2017.1.0f2" | [Component.android, Component.ios] | "build/unity"
-        "installUnity" | "2017.1.0f3" | [Component.webGl]                  | "build/unity"
+        taskToRun      | version                  | components                         | destination
+        "installUnity" | "${unityTestVersion()}1" | []                                 | "build/unity"
+        "installUnity" | "${unityTestVersion()}2" | [Component.android, Component.ios] | "build/unity"
+        "installUnity" | "${unityTestVersion()}3" | [Component.webGl]                  | "build/unity"
 //      "installUnity" | "2017.1.0f1" | []                                 | null
 //      "installUnity" | "2017.1.0f2" | [Component.android, Component.ios] | null
 //      "installUnity" | "2017.1.0f3" | [Component.webGl]                  | null
 
         components_message = components.size() > 0 ? "with components" : ""
         destination_message = destination ? "" : "to default destination"
-        options = (components.collect({"--component=${it}"}) << ((destination) ? "--destination=${destination}" : "") << ((version) ? "--version=${version}" : "")).findAll({it != ""})
+        options = (components.collect({
+            "--component=${it}"
+        }) << ((destination) ? "--destination=${destination}" : "") << ((version) ? "--version=${version}" : "")).findAll({
+            it != ""
+        })
     }
 
     @Unroll("installs unity version set in project #components_message")
@@ -102,17 +114,19 @@ class UvmInstallUnityIntegrationSpec extends IntegrationSpec {
         }
 
         where:
-        taskToRun      | version      | components                         | destination
-        "installUnity" | "2017.1.0f1" | []                                 | "build/unity"
-        "installUnity" | "2017.1.0f2" | [Component.android, Component.ios] | "build/unity"
-        "installUnity" | "2017.1.0f3" | [Component.webGl]                  | "build/unity"
+        taskToRun      | version                  | components                         | destination
+        "installUnity" | "${unityTestVersion()}1" | []                                 | "build/unity"
+        "installUnity" | "${unityTestVersion()}2" | [Component.android, Component.ios] | "build/unity"
+        "installUnity" | "${unityTestVersion()}3" | [Component.webGl]                  | "build/unity"
 //      "installUnity" | "2017.1.0f1" | []                                 | null
 //      "installUnity" | "2017.1.0f2" | [Component.android, Component.ios] | null
 //      "installUnity" | "2017.1.0f3" | [Component.webGl]                  | null
 
         components_message = components.size() > 0 ? "with components" : ""
         destination_message = destination ? "" : "to default destination"
-        options = (components.collect({"--component=${it}"}) << ((destination) ? "--destination=${destination}" : "")).findAll({it != ""})
+        options = (components.collect({
+            "--component=${it}"
+        }) << ((destination) ? "--destination=${destination}" : "")).findAll({ it != "" })
     }
 
     def "help prints commandline description for installUnity"() {

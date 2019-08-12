@@ -21,6 +21,7 @@ import net.wooga.test.unity.ProjectGeneratorRule
 import net.wooga.uvm.Component
 import net.wooga.uvm.UnityVersionManager
 import org.junit.Rule
+import spock.lang.IgnoreIf
 import spock.lang.Unroll
 import wooga.gradle.unity.UnityPlugin
 import wooga.gradle.unity.batchMode.BuildTarget
@@ -40,6 +41,14 @@ class UvmCheckInstalltionIntegrationSpec extends IntegrationSpec {
 
         """.stripIndent()
         unityProject.projectDir = projectDir
+    }
+
+    static String unityTestVersion() {
+        if (isLinux()) {
+            return "2019.1.0b1"
+        }
+
+        "2017.1.0f1"
     }
 
     @Unroll("#message and autoSwitchUnityEditor is true")
@@ -92,9 +101,9 @@ class UvmCheckInstalltionIntegrationSpec extends IntegrationSpec {
         result.standardOutput.contains(expectedUnityPath.path)
 
         where:
-        editorVersion                    | expectedUnityPath                                                   | autoSwitchEnabled
-        installedUnityVersions().first() | new File(baseUnityPath(),"Unity-${installedUnityVersions().first()}") | true
-        installedUnityVersions().first() | new File(baseUnityPath(),"Unity-${installedUnityVersions().last()}")  | false
+        editorVersion                    | expectedUnityPath                                                      | autoSwitchEnabled
+        installedUnityVersions().first() | new File(baseUnityPath(), "Unity-${installedUnityVersions().first()}") | true
+        installedUnityVersions().first() | new File(baseUnityPath(), "Unity-${installedUnityVersions().last()}")  | false
         baseVersion = installedUnityVersions().last()
         message = autoSwitchEnabled ? "switches path to unity" : "keeps configured path to unity"
     }
@@ -131,11 +140,11 @@ class UvmCheckInstalltionIntegrationSpec extends IntegrationSpec {
         new File(projectDir, installPath).deleteDir()
 
         where:
-        editorVersion | autoInstallEnabled | autoSwitchEnabled
-        "2017.1.0f1"  | false              | false
-        "2017.1.0f1"  | true               | false
-        "2017.1.0f1"  | false              | true
-        "2017.1.0f1"  | true               | true
+        editorVersion      | autoInstallEnabled | autoSwitchEnabled
+        unityTestVersion() | false              | false
+        unityTestVersion() | true               | false
+        unityTestVersion() | false              | true
+        unityTestVersion() | true               | true
 
         installPath = "build/unity_installations/${editorVersion}"
         baseVersion = installedUnityVersions().last()
@@ -167,6 +176,7 @@ class UvmCheckInstalltionIntegrationSpec extends IntegrationSpec {
         baseVersion = installedUnityVersions().last()
     }
 
+    @IgnoreIf({os.linux})
     @Unroll("when: #buildTarget")
     def "task :checkUnityInstallation #message when task contains buildTarget: #buildTarget"() {
         given: "A project with a mocked unity version"
@@ -194,7 +204,7 @@ class UvmCheckInstalltionIntegrationSpec extends IntegrationSpec {
         runTasksSuccessfully("customUnity")
 
         then:
-        if(expectedComponent) {
+        if (expectedComponent) {
             installation.components.contains(expectedComponent)
         } else {
             installation.components.size() == 0
@@ -205,11 +215,11 @@ class UvmCheckInstalltionIntegrationSpec extends IntegrationSpec {
         new File(projectDir, installPath).deleteDir()
 
         where:
-        editorVersion = "2017.1.0f1"
+        editorVersion = unityTestVersion()
         installPath = "build/unity_installations/${editorVersion}"
         baseVersion = installedUnityVersions().last()
         buildTarget << BuildTarget.values().toList()
-        expectedComponent << BuildTarget.values().collect {UnityVersionManagerPlugin.buildTargetToComponent(it)}
+        expectedComponent << BuildTarget.values().collect { UnityVersionManagerPlugin.buildTargetToComponent(it) }
         message = expectedComponent ? "installs: ${expectedComponent}" : "installs no component"
     }
 
@@ -253,7 +263,7 @@ class UvmCheckInstalltionIntegrationSpec extends IntegrationSpec {
         new File(projectDir, installPath).deleteDir()
 
         where:
-        editorVersion = "2017.1.0f1"
+        editorVersion = unityTestVersion()
         installPath = "build/unity_installations/${editorVersion}"
         baseVersion = installedUnityVersions().last()
         buildTarget1 = BuildTarget.ios
@@ -303,7 +313,7 @@ class UvmCheckInstalltionIntegrationSpec extends IntegrationSpec {
         new File(projectDir, installPath).deleteDir()
 
         where:
-        editorVersion = "2017.1.0f1"
+        editorVersion = unityTestVersion()
         installPath = "build/unity_installations/${editorVersion}"
         baseVersion = installedUnityVersions().last()
         buildTarget1 = BuildTarget.ios

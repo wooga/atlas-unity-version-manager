@@ -50,8 +50,8 @@ class UnityVersionManagerPlugin implements Plugin<Project> {
         def extension = create_and_configure_extension(project)
 
         String osName = System.getProperty("os.name").toLowerCase()
-        if (!osName.contains("mac os") && !osName.contains("windows")) {
-            logger.warn("This plugin is only supported on macOS and windows.")
+        if (!osName.contains("mac os") && !osName.contains("windows") && !osName.contains("linux")) {
+            logger.warn("This plugin is only supported on macOS and windows and linux.")
             return
         }
 
