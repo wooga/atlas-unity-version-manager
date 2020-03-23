@@ -306,7 +306,6 @@ class UvmCheckInstalltionIntegrationSpec extends IntegrationSpec {
         runTasksSuccessfully("customUnity")
 
         then:
-        installation.components.size() == 1
         installation.components.contains(expectedComponent)
 
         cleanup:
