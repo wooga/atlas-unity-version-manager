@@ -21,5 +21,5 @@
 
 withCredentials([string(credentialsId: 'atlas_unity_version_manager_coveralls_token', variable: 'coveralls_token')]) {
 
-    buildGradlePlugin(plaforms:['osx', 'linux'], coverallsToken: coveralls_token, testEnvironment: [])
+    buildGradlePlugin(plaforms:['osx', 'linux'], coverallsToken: coveralls_token, testEnvironment: [], labels: 'primary')
 }
