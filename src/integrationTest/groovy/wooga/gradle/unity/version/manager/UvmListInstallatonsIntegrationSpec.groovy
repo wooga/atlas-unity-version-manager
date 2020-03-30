@@ -17,7 +17,10 @@
 
 package wooga.gradle.unity.version.manager
 
+import com.wooga.spock.extensions.uvm.UnityInstallation
+import net.wooga.uvm.Installation
 import net.wooga.uvm.UnityVersionManager
+import spock.lang.Shared
 import spock.lang.Unroll
 
 class UvmListInstallatonsIntegrationSpec extends IntegrationSpec {

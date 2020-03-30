@@ -17,9 +17,12 @@
 
 package wooga.gradle.unity.version.manager
 
+import com.wooga.spock.extensions.uvm.UnityInstallation
+import net.wooga.uvm.Installation
 import org.junit.Rule
 import org.junit.contrib.java.lang.system.EnvironmentVariables
 import org.junit.contrib.java.lang.system.ProvideSystemProperty
+import spock.lang.Shared
 
 import static groovy.json.StringEscapeUtils.escapeJava
 
@@ -30,6 +33,14 @@ class IntegrationSpec extends nebula.test.IntegrationSpec {
 
     @Rule
     ProvideSystemProperty properties = new ProvideSystemProperty("ignoreDeprecations", "true")
+
+    @Shared
+    @UnityInstallation(version="2018.4.19f1", basePath = "build/unity", cleanup = true)
+    Installation preInstalledUnity2018_4_19f1
+
+    @Shared
+    @UnityInstallation(version="2018.4.18f1", basePath = "build/unity", cleanup = true)
+    Installation preInstalledUnity2018_4_18f1
 
     def setup() {
         def gradleVersion = System.getenv("GRADLE_VERSION")
@@ -73,13 +84,7 @@ class IntegrationSpec extends nebula.test.IntegrationSpec {
     }
 
     File baseUnityPath() {
-        if(isWindows()) {
-            new File("C:\\Program Files")
-        } else if (isMac()) {
-            new File("/Applications")
-        } else if (isLinux()) {
-            new File("${System.getenv('HOME')}/.local/share")
-        }
+        new File("build/unity")
     }
 
     File unityExecutablePath() {

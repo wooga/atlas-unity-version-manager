@@ -16,7 +16,7 @@
  */
 
 plugins {
-    id 'net.wooga.plugins' version '1.1.0'
+    id 'net.wooga.plugins' version '1.4.0'
 }
 
 group 'net.wooga.gradle'
@@ -51,4 +51,5 @@ dependencies {
     compile "gradle.plugin.net.wooga.gradle:atlas-unity:1.+"
     testCompile 'net.wooga.test:unity-project-generator-rule:0.2.0'
     testCompile 'com.github.stefanbirkner:system-rules:1.18.0'
+    testCompile "com.wooga.spock.extensions:spock-unity-version-manager-extension:0.1.0"
 }
