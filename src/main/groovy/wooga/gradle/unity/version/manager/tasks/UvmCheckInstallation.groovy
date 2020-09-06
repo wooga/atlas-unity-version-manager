@@ -106,6 +106,8 @@ class UvmCheckInstallation extends DefaultTask {
             return
         }
 
+        installation.location.setLastModified(new Date().getTime())
+
         if (!autoSwitchUnityEditor.get()) {
             logger.info("auto switch editor is turned off")
             return
