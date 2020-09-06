@@ -176,6 +176,38 @@ class UvmCheckInstalltionIntegrationSpec extends IntegrationSpec {
         baseVersion = preInstalledUnity2019_4_31f1
     }
 
+    @Unroll
+    def "task :checkUnityInstallation changes last modified time after check and installation"() {
+        given: "A project with a mocked unity version"
+        unityProject.setProjectVersion(editorVersion)
+
+        and: "version switch and install enabled"
+        buildFile << """
+        uvm.autoSwitchUnityEditor = true
+        uvm.autoInstallUnityEditor = true
+        """.stripIndent()
+
+        and: "and a custom set unity path matching project version"
+        buildFile << """
+        unity.unityPath = file("${pathToUnityVersion(editorVersion)}")
+        """.stripIndent()
+
+        and: "and a unity installation without components"
+        def installation = UnityVersionManager.installUnityEditor(editorVersion, new File(projectDir, installPath))
+        assert installation
+        def installationLastModified = installation.location.lastModified()
+
+        when:
+        runTasksSuccessfully("customUnity")
+
+        then:
+        installation.location.lastModified() > installationLastModified
+
+        where:
+        editorVersion = unityTestVersion()
+        installPath = "build/unity_installations/${editorVersion}"
+    }
+
     @Ignore("This test does not scale over multiple versions of unity")
     @Unroll("when: #buildTarget")
     def "task :checkUnityInstallation #message when task contains buildTarget: #buildTarget"() {
