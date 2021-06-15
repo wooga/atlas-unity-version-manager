@@ -61,7 +61,7 @@ class UvmListInstallations extends DefaultTask {
     UvmListInstallations() {
         super()
         this.outputs.upToDateWhen({ false })
-        this.outputFile = project.layout.fileProperty()
+        this.outputFile = project.objects.fileProperty()
         this.outputPrintStream = project.provider({
             this.outputFile.map({
                 new GroovyPrintStream(it.asFile) as PrintStream

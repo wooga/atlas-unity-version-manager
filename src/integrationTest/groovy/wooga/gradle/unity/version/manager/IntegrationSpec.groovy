@@ -35,11 +35,11 @@ class IntegrationSpec extends nebula.test.IntegrationSpec {
     ProvideSystemProperty properties = new ProvideSystemProperty("ignoreDeprecations", "true")
 
     @Shared
-    @UnityInstallation(version="2018.4.19f1", basePath = "build/unity", cleanup = true)
+    @UnityInstallation(version = "2018.4.2f1", basePath = "build/unity", cleanup = false)
     Installation preInstalledUnity2018_4_19f1
 
     @Shared
-    @UnityInstallation(version="2018.4.18f1", basePath = "build/unity", cleanup = true)
+    @UnityInstallation(version = "2018.4.1f1", basePath = "build/unity", cleanup = false)
     Installation preInstalledUnity2018_4_18f1
 
     def setup() {
@@ -49,12 +49,12 @@ class IntegrationSpec extends nebula.test.IntegrationSpec {
             fork = true
         }
 
-        environmentVariables.clear(
-                UnityVersionManagerConsts.UNITY_VERSION_ENV_VAR,
-                UnityVersionManagerConsts.UNITY_INSTALL_BASE_DIR_PATH_ENV_VAR,
-                UnityVersionManagerConsts.AUTO_INSTALL_UNITY_EDITOR_PATH_ENV_VAR,
-                UnityVersionManagerConsts.AUTO_SWITCH_UNITY_EDITOR_PATH_ENV_VAR
-        )
+        (UnityVersionManagerConventions.unityVersion.environmentKeys +
+                UnityVersionManagerConventions.unityInstallBaseDir.environmentKeys +
+                UnityVersionManagerConventions.autoInstallUnityEditor.environmentKeys +
+                UnityVersionManagerConventions.autoSwitchUnityEditor.environmentKeys).each {
+            environmentVariables.clear(it)
+        }
     }
 
     static String escapedPath(String path) {
@@ -123,7 +123,7 @@ class IntegrationSpec extends nebula.test.IntegrationSpec {
     static String testPath(String path) {
         if (isWindows()) {
             if (path.startsWith("/")) {
-                path =  "C:" + path
+                path = "C:" + path
             }
 
             path = path.replace('/', '\\')
