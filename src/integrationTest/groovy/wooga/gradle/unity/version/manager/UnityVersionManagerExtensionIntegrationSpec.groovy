@@ -163,7 +163,7 @@ class UnityVersionManagerExtensionIntegrationSpec extends IntegrationSpec {
                 unityVersion = "${defaultProjectVersion}"
             }
 
-            def componentsProvider = uvm.buildRequiredUnityComponentsProvider
+            def componentsProvider = uvm.buildRequiredUnityComponents
 
             task(customUnityIos, type: ${Unity.name}) {
                 buildTarget = 'ios'
@@ -177,7 +177,7 @@ class UnityVersionManagerExtensionIntegrationSpec extends IntegrationSpec {
                 buildTarget = 'webGl'
             }
             
-            [customUnityIos, customUnityAndroid, customUnityWebGl].each {it.deleteAllActions()}
+            [customUnityIos, customUnityAndroid, customUnityWebGl].each {it.actions = []}
             
             task(printComponents) {                
                 println("print during task configuration: " + componentsProvider.get().sort())

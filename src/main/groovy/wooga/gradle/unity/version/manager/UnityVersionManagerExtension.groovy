@@ -21,6 +21,7 @@ import net.wooga.uvm.Component
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
+import org.gradle.api.provider.SetProperty
 
 interface UnityVersionManagerExtension {
 
@@ -77,5 +78,5 @@ interface UnityVersionManagerExtension {
      * @param project the gradle project
      * @return A provider object which resolves the required build components needed for the current build.
      */
-    Provider<Set<Component>> getBuildRequiredUnityComponentsProvider()
+    SetProperty<Component> getBuildRequiredUnityComponents()
 }

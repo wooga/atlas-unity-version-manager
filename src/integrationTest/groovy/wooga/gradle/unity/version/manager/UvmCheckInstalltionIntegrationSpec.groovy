@@ -24,7 +24,7 @@ import org.junit.Rule
 import spock.lang.IgnoreIf
 import spock.lang.Unroll
 import wooga.gradle.unity.UnityPlugin
-import wooga.gradle.unity.batchMode.BuildTarget
+import wooga.gradle.unity.models.BuildTarget
 import wooga.gradle.unity.tasks.Unity
 
 class UvmCheckInstalltionIntegrationSpec extends IntegrationSpec {
@@ -169,7 +169,7 @@ class UvmCheckInstalltionIntegrationSpec extends IntegrationSpec {
 
         expect:
         def result = runTasksWithFailure("customUnity")
-        result.standardOutput.contains("Unable to install requested unity version ${editorVersion}")
+        result.standardError.contains("Unable to install requested unity version ${editorVersion}")
 
         where:
         editorVersion = "2030.1.0f1"
