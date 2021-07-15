@@ -33,7 +33,7 @@ class UvmInstallUnityIntegrationSpec extends IntegrationSpec {
             return "2019.1.0b"
         }
 
-        "2017.1.0f"
+        "2018.1.0f"
     }
 
     @Unroll("installs unity #components_message #destination_message")

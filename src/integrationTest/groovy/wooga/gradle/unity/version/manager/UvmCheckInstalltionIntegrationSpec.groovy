@@ -48,7 +48,7 @@ class UvmCheckInstalltionIntegrationSpec extends IntegrationSpec {
             return "2019.1.0b1"
         }
 
-        "2017.1.0f1"
+        "2018.1.0f1"
     }
 
     @Unroll("#message and autoSwitchUnityEditor is true")
