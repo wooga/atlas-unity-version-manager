@@ -17,7 +17,7 @@
 
 package wooga.gradle.unity.version.manager
 
-import wooga.gradle.unity.utils.PropertyLookup
+import com.wooga.gradle.PropertyLookup
 
 class UnityVersionManagerConventions {
 
