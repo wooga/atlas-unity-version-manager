@@ -18,7 +18,7 @@ This plugin is work in progress.
 **build.gradle**
 ```groovy
 plugins {
-    id 'net.wooga.unity-version-manager' version '0.1.0'
+    id 'net.wooga.unity-version-manager' version '1.0.0-rc.2'
 }
 ```
 
