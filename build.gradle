@@ -46,7 +46,7 @@ repositories {
 }
 
 dependencies {
-    implementation "net.wooga:unity-version-manager-jni:(1,2]"
+    implementation 'net.wooga:unity-version-manager-jni:1.4.0'
     implementation "gradle.plugin.net.wooga.gradle:atlas-unity:(2,3]"
     implementation "com.wooga.gradle:gradle-commons:0.1.0"
     testImplementation 'net.wooga.test:unity-project-generator-rule:0.3.0'
@@ -61,4 +61,8 @@ configurations.all {
         force 'org.codehaus.groovy:groovy-sql:2.5.12'
         force 'org.codehaus.groovy:groovy-xml:2.5.12'
     }
+}
+
+integrationTest {
+    testLogging.showStandardStreams = true
 }

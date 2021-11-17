@@ -35,12 +35,12 @@ class IntegrationSpec extends nebula.test.IntegrationSpec {
     ProvideSystemProperty properties = new ProvideSystemProperty("ignoreDeprecations", "true")
 
     @Shared
-    @UnityInstallation(version = "2018.4.2f1", basePath = "build/unity", cleanup = false)
-    Installation preInstalledUnity2018_4_19f1
+    @UnityInstallation(version = "2019.4.32f1", basePath = "build/unity", cleanup = false)
+    Installation preInstalledUnity2019_4_32f1
 
     @Shared
-    @UnityInstallation(version = "2018.4.1f1", basePath = "build/unity", cleanup = false)
-    Installation preInstalledUnity2018_4_18f1
+    @UnityInstallation(version = "2019.4.31f1", basePath = "build/unity", cleanup = false)
+    Installation preInstalledUnity2019_4_31f1
 
     def setup() {
         def gradleVersion = System.getenv("GRADLE_VERSION")
@@ -63,47 +63,6 @@ class IntegrationSpec extends nebula.test.IntegrationSpec {
             return escapeJava(path)
         }
         path
-    }
-
-    static List<String> _installedUnityVersions
-
-    List<String> installedUnityVersions() {
-        if (_installedUnityVersions) {
-            return _installedUnityVersions
-        }
-
-        def applications = baseUnityPath()
-        _installedUnityVersions = applications.listFiles(new FilenameFilter() {
-            @Override
-            boolean accept(File dir, String name) {
-                return name.startsWith("Unity-")
-            }
-        }).collect {
-            it.name.replace("Unity-", "")
-        }
-    }
-
-    File baseUnityPath() {
-        new File("build/unity")
-    }
-
-    File unityExecutablePath() {
-        if (isWindows()) {
-            new File("Editor\\Unity.exe")
-        } else if (isMac()) {
-            new File("Unity.app/Contents/MacOS/Unity")
-        } else if (isLinux()) {
-            new File("Editor/Unity")
-        }
-    }
-
-    File unityVersion(String version) {
-        def base = new File(baseUnityPath(), "Unity-${version}")
-        new File(base, unityExecutablePath().path)
-    }
-
-    String pathToUnityVersion(String version) {
-        escapedPath(unityVersion(version).absolutePath)
     }
 
     static String OS = System.getProperty("os.name").toLowerCase()
