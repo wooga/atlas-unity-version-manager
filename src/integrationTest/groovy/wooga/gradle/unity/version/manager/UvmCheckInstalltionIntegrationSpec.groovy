@@ -21,10 +21,11 @@ import net.wooga.test.unity.ProjectGeneratorRule
 import net.wooga.uvm.Component
 import net.wooga.uvm.UnityVersionManager
 import org.junit.Rule
+import spock.lang.Ignore
 import spock.lang.IgnoreIf
 import spock.lang.Unroll
 import wooga.gradle.unity.UnityPlugin
-import wooga.gradle.unity.batchMode.BuildTarget
+import wooga.gradle.unity.models.BuildTarget
 import wooga.gradle.unity.tasks.Unity
 
 class UvmCheckInstalltionIntegrationSpec extends IntegrationSpec {
@@ -44,11 +45,7 @@ class UvmCheckInstalltionIntegrationSpec extends IntegrationSpec {
     }
 
     static String unityTestVersion() {
-        if (isLinux()) {
-            return "2019.1.0b1"
-        }
-
-        "2017.1.0f1"
+        "2019.4.30f1"
     }
 
     @Unroll("#message and autoSwitchUnityEditor is true")
@@ -63,26 +60,29 @@ class UvmCheckInstalltionIntegrationSpec extends IntegrationSpec {
 
         and: "and a custom set unity path not matching the project version"
         buildFile << """
-        unity.unityPath = file("${pathToUnityVersion(baseVersion)}")
+        unity.unityPath = file("${baseVersion.executable.absolutePath}")
         """.stripIndent()
 
         when:
-        def result = runTasksSuccessfully("customUnity")
+        def result = runTasks("customUnity")
 
         then:
+        println(result.standardError)
+        println(result.standardOutput)
+        result.success
         result.standardOutput.contains(expectedUnityPath.path)
 
         where:
         editorVersion | expectedUnityPath
-        "2030.1.2f3"  | unityVersion(installedUnityVersions().last())
-        baseVersion = installedUnityVersions().last()
+        "2030.1.2f3"  | preInstalledUnity2019_4_31f1.executable
+        baseVersion = preInstalledUnity2019_4_31f1
         message = "keeps configured path when unity is not found"
     }
 
     @Unroll("#message if autoSwitchUnityEditor is #autoSwitchEnabled")
     def "task :checkUnityInstallation #message if autoSwitchUnityEditor is #autoSwitchEnabled"() {
         given: "A project with a mocked unity version"
-        unityProject.setProjectVersion(editorVersion)
+        unityProject.setProjectVersion(editorVersion.version)
 
         and: "version switch enabled"
         buildFile << """
@@ -91,20 +91,20 @@ class UvmCheckInstalltionIntegrationSpec extends IntegrationSpec {
 
         and: "and a custom set unity path non matching project version"
         buildFile << """
-        unity.unityPath = file("${pathToUnityVersion(baseVersion)}")
+        unity.unityPath = file("${baseVersion.executable}")
         """.stripIndent()
 
         when:
-        def result = runTasksSuccessfully("customUnity")
+        def result = runTasks("customUnity")
 
         then:
-        result.standardOutput.contains(expectedUnityPath.path)
+        result.standardOutput.contains(expectedUnityPath.absolutePath)
 
         where:
-        editorVersion                    | expectedUnityPath                                                      | autoSwitchEnabled
-        installedUnityVersions().first() | new File(baseUnityPath(), "Unity-${installedUnityVersions().first()}") | true
-        installedUnityVersions().first() | new File(baseUnityPath(), "Unity-${installedUnityVersions().last()}")  | false
-        baseVersion = installedUnityVersions().last()
+        editorVersion                | expectedUnityPath                     | autoSwitchEnabled
+        preInstalledUnity2019_4_31f1 | editorVersion.location                | true
+        preInstalledUnity2019_4_31f1 | preInstalledUnity2019_4_32f1.location | false
+        baseVersion = preInstalledUnity2019_4_32f1
         message = autoSwitchEnabled ? "switches path to unity" : "keeps configured path to unity"
     }
 
@@ -122,7 +122,7 @@ class UvmCheckInstalltionIntegrationSpec extends IntegrationSpec {
 
         and: "and a custom set unity path no matching project version"
         buildFile << """
-        unity.unityPath = file("${pathToUnityVersion(baseVersion)}")
+        unity.unityPath = file("${baseVersion.executable.absolutePath}")
         """.stripIndent()
 
         when:
@@ -133,7 +133,7 @@ class UvmCheckInstalltionIntegrationSpec extends IntegrationSpec {
             def expectedUnityPath = new File(projectDir, installPath)
             result.standardOutput.contains(expectedUnityPath.path)
         } else {
-            result.standardOutput.contains("${pathToUnityVersion(baseVersion)}")
+            result.standardOutput.contains("${baseVersion.executable.absolutePath}")
         }
 
         cleanup:
@@ -147,7 +147,7 @@ class UvmCheckInstalltionIntegrationSpec extends IntegrationSpec {
         unityTestVersion() | true               | true
 
         installPath = "build/unity_installations/${editorVersion}"
-        baseVersion = installedUnityVersions().last()
+        baseVersion = preInstalledUnity2019_4_31f1
         message = (autoInstallEnabled && autoSwitchEnabled) ? "installs & uses version" : "uses default version"
     }
 
@@ -164,19 +164,19 @@ class UvmCheckInstalltionIntegrationSpec extends IntegrationSpec {
 
         and: "and a custom set unity path no matching project version"
         buildFile << """
-        unity.unityPath = file("${pathToUnityVersion(baseVersion)}")
+        unity.unityPath = file("${baseVersion.executable.absolutePath}")
         """.stripIndent()
 
         expect:
         def result = runTasksWithFailure("customUnity")
-        result.standardOutput.contains("Unable to install requested unity version ${editorVersion}")
+        result.standardError.contains("Unable to install requested unity version ${editorVersion}")
 
         where:
         editorVersion = "2030.1.0f1"
-        baseVersion = installedUnityVersions().last()
+        baseVersion = preInstalledUnity2019_4_31f1
     }
 
-    @IgnoreIf({os.linux})
+    @Ignore("This test does not scale over multiple versions of unity")
     @Unroll("when: #buildTarget")
     def "task :checkUnityInstallation #message when task contains buildTarget: #buildTarget"() {
         given: "A project with a mocked unity version"
@@ -190,7 +190,7 @@ class UvmCheckInstalltionIntegrationSpec extends IntegrationSpec {
 
         and: "and a custom set unity path no matching project version"
         buildFile << """
-        unity.unityPath = file("${pathToUnityVersion(baseVersion)}")
+        unity.unityPath = file("${baseVersion.executable.absolutePath}")
         """.stripIndent()
 
         and: "and a unity installation without components"
@@ -217,7 +217,7 @@ class UvmCheckInstalltionIntegrationSpec extends IntegrationSpec {
         where:
         editorVersion = unityTestVersion()
         installPath = "build/unity_installations/${editorVersion}"
-        baseVersion = installedUnityVersions().last()
+        baseVersion = preInstalledUnity2019_4_31f1
         buildTarget << BuildTarget.values().toList()
         expectedComponent << BuildTarget.values().collect { UnityVersionManagerPlugin.buildTargetToComponent(it) }
         message = expectedComponent ? "installs: ${expectedComponent}" : "installs no component"
@@ -228,6 +228,12 @@ class UvmCheckInstalltionIntegrationSpec extends IntegrationSpec {
         given: "A project with a mocked unity version"
         unityProject.setProjectVersion(editorVersion)
 
+        and: "make sure version is not installed"
+        def i = UnityVersionManager.locateUnityInstallation(editorVersion)
+        if(i) {
+            i.location.deleteDir()
+        }
+
         and: "version switch and install enabled"
         buildFile << """
         uvm.autoSwitchUnityEditor = true
@@ -236,7 +242,7 @@ class UvmCheckInstalltionIntegrationSpec extends IntegrationSpec {
 
         and: "and a custom set unity path no matching project version"
         buildFile << """
-        unity.unityPath = file("${pathToUnityVersion(baseVersion)}")
+        unity.unityPath = file("${baseVersion.location.absolutePath}")
         """.stripIndent()
 
         and: "and a unity installation without components"
@@ -265,7 +271,7 @@ class UvmCheckInstalltionIntegrationSpec extends IntegrationSpec {
         where:
         editorVersion = unityTestVersion()
         installPath = "build/unity_installations/${editorVersion}"
-        baseVersion = installedUnityVersions().last()
+        baseVersion = preInstalledUnity2019_4_31f1
         buildTarget1 = BuildTarget.ios
         buildTarget2 = BuildTarget.android
         expectedComponent1 = Component.ios
@@ -286,8 +292,14 @@ class UvmCheckInstalltionIntegrationSpec extends IntegrationSpec {
 
         and: "and a custom set unity path no matching project version"
         buildFile << """
-        unity.unityPath = file("${pathToUnityVersion(baseVersion)}")
+        unity.unityPath = file("${baseVersion.executable.absolutePath}")
         """.stripIndent()
+
+        and: "make sure version is not installed"
+        def i = UnityVersionManager.locateUnityInstallation(editorVersion)
+        if(i) {
+            i.location.deleteDir()
+        }
 
         and: "and a unity installation without components"
         def installation = UnityVersionManager.installUnityEditor(editorVersion, new File(projectDir, installPath))
@@ -314,7 +326,7 @@ class UvmCheckInstalltionIntegrationSpec extends IntegrationSpec {
         where:
         editorVersion = unityTestVersion()
         installPath = "build/unity_installations/${editorVersion}"
-        baseVersion = installedUnityVersions().last()
+        baseVersion = preInstalledUnity2019_4_31f1
         buildTarget1 = BuildTarget.ios
         buildTarget2 = BuildTarget.android
         expectedComponent = Component.ios

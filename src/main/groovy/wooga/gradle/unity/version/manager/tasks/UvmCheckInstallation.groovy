@@ -22,6 +22,7 @@ import net.wooga.uvm.Installation
 import net.wooga.uvm.UnityVersionManager
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.SetProperty
 import org.gradle.api.tasks.Input
@@ -50,6 +51,7 @@ class UvmCheckInstallation extends DefaultTask {
     final DirectoryProperty unityInstallBaseDir
 
     @Input
+    @Optional
     final SetProperty<Component> buildRequiredUnityComponents
 
     UvmCheckInstallation() {
@@ -57,7 +59,7 @@ class UvmCheckInstallation extends DefaultTask {
         unityExtension = project.objects.property(UnityPluginExtension)
         autoSwitchUnityEditor = project.objects.property(Boolean)
         autoInstallUnityEditor = project.objects.property(Boolean)
-        unityInstallBaseDir = project.layout.directoryProperty()
+        unityInstallBaseDir = project.objects.directoryProperty()
         buildRequiredUnityComponents = project.objects.setProperty(Component)
     }
 
@@ -114,7 +116,7 @@ class UvmCheckInstallation extends DefaultTask {
         if(unityExtension.present) {
             logger.info("update path to unity installtion ${installation.location}")
             def extension = unityExtension.get()
-            extension.unityPath = installation.executable
+            extension.unityPath.set(installation.executable)
         }
     }
 }

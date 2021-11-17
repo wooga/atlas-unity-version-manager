@@ -70,7 +70,7 @@ class UvmInstallUnity extends DefaultTask {
     UvmInstallUnity() {
         unityVersion = project.objects.property(String)
         components = project.objects.setProperty(Component)
-        installDestination = project.layout.directoryProperty()
+        installDestination = project.objects.directoryProperty()
 
         outputs.upToDateWhen(new Spec<UvmInstallUnity>() {
             @Override

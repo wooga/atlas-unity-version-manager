@@ -31,31 +31,30 @@ Development
 Gradle and Java Compatibility
 =============================
 
-Built with Oracle JDK7
-Tested with Oracle JDK8
+Built with OpenJDK8
 
 | Gradle Version  | Works  |
 | :-------------: | :----: |
-| < 3.0           | ![no]  |
-| 3.0             | ![no]  |
-| 3.1             | ![no]  |
-| 3.2             | ![no]  |
-| 3.3             | ![no]  |
-| 3.4             | ![no]  |
-| 3.5             | ![no]  |
-| 3.5.1           | ![no]  |
-| 4.0             | ![no]  |
-| 4.1             | ![no]  |
-| 4.2             | ![no]  |
-| 4.3             | ![no]  |
-| 4.4             | ![no]  |
-| 4.5             | ![no]  |
-| 4.6             | ![no]  |
-| 4.6             | ![no]  |
-| 4.7             | ![yes] |
-| 4.8             | ![yes] |
-| 4.9             | ![yes] |
-| 4.10            | ![yes] |
+| < 5.1           | ![no]  |
+| 5.1             | ![yes] |
+| 5.2             | ![yes] |
+| 5.3             | ![yes] |
+| 5.4             | ![yes] |
+| 5.5             | ![yes] |
+| 5.6             | ![yes] |
+| 5.6             | ![yes] |
+| 6.0             | ![yes] |
+| 6.1             | ![yes] |
+| 6.2             | ![yes] |
+| 6.3             | ![yes] |
+| 6.4             | ![yes] |
+| 6.5             | ![yes] |
+| 6.6             | ![yes] |
+| 6.6             | ![yes] |
+| 6.7             | ![yes] |
+| 6.8             | ![yes] |
+| 6.9             | ![yes] |
+| 7.0             | ![yes] |
 
 LICENSE
 =======

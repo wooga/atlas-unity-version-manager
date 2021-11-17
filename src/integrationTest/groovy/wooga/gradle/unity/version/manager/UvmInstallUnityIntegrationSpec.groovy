@@ -29,11 +29,7 @@ class UvmInstallUnityIntegrationSpec extends IntegrationSpec {
     }
 
     static String unityTestVersion() {
-        if (isLinux()) {
-            return "2019.1.0b"
-        }
-
-        "2017.1.0f"
+        "2019.1.0b"
     }
 
     @Unroll("installs unity #components_message #destination_message")

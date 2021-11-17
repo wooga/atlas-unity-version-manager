@@ -16,7 +16,7 @@
  */
 
 plugins {
-    id 'net.wooga.plugins' version '1.4.0'
+    id 'net.wooga.plugins' version '2.1.1'
 }
 
 group 'net.wooga.gradle'
@@ -41,15 +41,28 @@ github {
 }
 
 repositories {
-    jcenter()
-    maven { url "https://dl.bintray.com/wooga/maven" }
+    mavenCentral()
     maven { url 'https://repo.gradle.org/gradle/libs-releases' }
 }
 
 dependencies {
-    compile "net.wooga:unity-version-manager-jni:1.+"
-    compile "gradle.plugin.net.wooga.gradle:atlas-unity:1.+"
-    testCompile 'net.wooga.test:unity-project-generator-rule:0.2.0'
-    testCompile 'com.github.stefanbirkner:system-rules:1.18.0'
-    testCompile "com.wooga.spock.extensions:spock-unity-version-manager-extension:0.1.0"
+    implementation 'net.wooga:unity-version-manager-jni:1.4.0'
+    implementation "gradle.plugin.net.wooga.gradle:atlas-unity:(2,3]"
+    implementation "com.wooga.gradle:gradle-commons:0.1.0"
+    testImplementation 'net.wooga.test:unity-project-generator-rule:0.3.0'
+    testImplementation "com.wooga.spock.extensions:spock-unity-version-manager-extension:0.2.0"
+}
+
+configurations.all {
+    resolutionStrategy {
+        force 'org.codehaus.groovy:groovy-all:2.5.12'
+        force 'org.codehaus.groovy:groovy-macro:2.5.12'
+        force 'org.codehaus.groovy:groovy-nio:2.5.12'
+        force 'org.codehaus.groovy:groovy-sql:2.5.12'
+        force 'org.codehaus.groovy:groovy-xml:2.5.12'
+    }
+}
+
+integrationTest {
+    testLogging.showStandardStreams = true
 }
