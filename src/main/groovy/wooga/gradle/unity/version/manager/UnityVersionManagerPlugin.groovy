@@ -114,29 +114,28 @@ class UnityVersionManagerPlugin implements Plugin<Project> {
         extension.autoSwitchUnityEditor.convention(UnityVersionManagerConventions.autoSwitchUnityEditor.getBooleanValueProvider(project))
         extension.autoInstallUnityEditor.convention(UnityVersionManagerConventions.autoInstallUnityEditor.getBooleanValueProvider(project))
 
-            extension.buildRequiredUnityComponents.set(project.provider({
-                project.tasks.withType(UnityTask)
-                        .findAll({
-                            try {
-                                return project.gradle.taskGraph.hasTask(it)
-                            } catch (IllegalStateException ignored) {
-                                logger.warn("try to filter required build components to early. Filter not applied")
-                            }
-                            true
-                        })
-                        .collect({
-                    BuildTargetToComponent.buildTargetToComponent(it.buildTarget)
-                })
-            }).flatMap(new Transformer<Provider<List<Component>>, List<Provider<Component>>>() {
-                @Override
-                Provider<List<Component>> transform(List<Provider<Component>> providers) {
-                    project.provider({
-                        providers.collect {
-                            it.getOrElse(Component.unknown)
-                        }.findAll {it != Component.unknown }
+        extension.buildRequiredUnityComponents.convention(project.provider({
+            project.tasks.withType(UnityTask)
+                    .findAll({
+                        try {
+                            return project.gradle.taskGraph.hasTask(it)
+                        } catch (IllegalStateException ignored) {
+                        }
+                        true
                     })
-                }
-            }))
+                    .collect({
+                BuildTargetToComponent.buildTargetToComponent(it.buildTarget)
+            })
+        }).flatMap(new Transformer<Provider<List<Component>>, List<Provider<Component>>>() {
+            @Override
+            Provider<List<Component>> transform(List<Provider<Component>> providers) {
+                project.provider({
+                    providers.collect {
+                        it.getOrElse(Component.unknown)
+                    }.findAll {it != Component.unknown }
+                })
+            }
+        }))
         extension
     }
 

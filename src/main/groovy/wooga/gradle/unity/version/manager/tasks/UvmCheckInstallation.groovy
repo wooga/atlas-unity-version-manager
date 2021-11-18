@@ -89,7 +89,7 @@ class UvmCheckInstallation extends DefaultTask {
 
         if (autoSwitchUnityEditor.get() && autoInstallUnityEditor.get() && needInstall) {
             def destination = unityInstallBaseDir.file(version).get().asFile
-            def components = buildRequiredUnityComponents.get().toArray() as Component[]
+            def components = buildRequiredUnityComponents.getOrElse(new HashSet<Component>()).toArray() as Component[]
             logger.info("install unity ${version}")
             if(components.size() > 0) {
                 logger.info("with components: ")
