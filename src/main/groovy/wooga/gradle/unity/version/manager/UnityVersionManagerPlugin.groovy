@@ -38,6 +38,8 @@ import wooga.gradle.unity.version.manager.tasks.UvmCheckInstallation
 import wooga.gradle.unity.version.manager.tasks.UvmInstallUnity
 import wooga.gradle.unity.version.manager.tasks.UvmListInstallations
 import wooga.gradle.unity.version.manager.tasks.UvmVersion
+import org.apache.maven.artifact.versioning.ArtifactVersion
+import org.apache.maven.artifact.versioning.DefaultArtifactVersion
 
 class UnityVersionManagerPlugin implements Plugin<Project> {
 
@@ -124,27 +126,15 @@ class UnityVersionManagerPlugin implements Plugin<Project> {
                         true
                     })
                     .collect({
-                BuildTargetToComponent.buildTargetToComponent(it.buildTarget)
-            })
-        }).flatMap(new Transformer<Provider<List<Component>>, List<Provider<Component>>>() {
-            @Override
-            Provider<List<Component>> transform(List<Provider<Component>> providers) {
-                project.provider({
-                    providers.collect {
-                        it.getOrElse(Component.unknown)
-                    }.findAll {it != Component.unknown }
-                })
-            }
+                        buildTargetToComponents(it.buildTarget.get(), extension.unityVersion.get())
+                    })
         }))
         extension
     }
 
-    static Component buildTargetToComponent(BuildTarget target) {
-        buildTargetToComponent(target.toString())
-    }
-
-    static Component buildTargetToComponent(String target) {
+    static List<Component> buildTargetToComponents(String target, String versionString) {
         Component component = Component.unknown
+        ArtifactVersion version = new DefaultArtifactVersion(versionString.split(/f|p|b|a/).first().toString())
         switch (target.toLowerCase()) {
             case "android":
                 component = Component.android
@@ -172,22 +162,31 @@ class UnityVersionManagerPlugin implements Plugin<Project> {
             case "win32":
             case "win64":
                 if (!System.getProperty("os.name").toLowerCase().startsWith("windows")) {
-                    component = Component.windows
+                    component = Component.windowsMono
                 }
                 break
         }
-        component
-    }
 
-    private static class BuildTargetToComponent implements Transformer<Component, String> {
-        static Provider<Component> buildTargetToComponent(Provider<String> buildTarget) {
-            buildTarget.map(new BuildTargetToComponent())
+        if (version.majorVersion >= 2019) {
+            switch (target.toLowerCase()) {
+                case "linux64":
+                    component = Component.linuxMono
+                    break
+            }
         }
 
-        @Override
-        Component transform(String target) {
-            // Android, Linux, Linux64, LinuxUniversal, Lumin, OSXUniversal, PS4, Switch, WebGL, Win, Win64, WindowsStoreApps, XboxOne, iOS, tvOS
-            buildTargetToComponent(target)
-        }
+        [component]
     }
+
+//    private static class BuildTargetToComponents implements Transformer<List<Component>, String> {
+//        static Provider<List<Component>> buildTargetToComponents(Provider<String> buildTarget, Provider<String> version) {
+//            buildTarget.map(new BuildTargetToComponents())
+//        }
+//
+//        @Override
+//        List<Component> transform(String target) {
+//            // Android, Linux, Linux64, LinuxUniversal, Lumin, OSXUniversal, PS4, Switch, WebGL, Win, Win64, WindowsStoreApps, XboxOne, iOS, tvOS
+//            buildTargetToComponent(target, null)
+//        }
+//    }
 }

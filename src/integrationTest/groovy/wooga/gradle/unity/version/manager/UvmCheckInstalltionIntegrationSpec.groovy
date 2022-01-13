@@ -176,7 +176,6 @@ class UvmCheckInstalltionIntegrationSpec extends IntegrationSpec {
         baseVersion = preInstalledUnity2019_4_31f1
     }
 
-    @Ignore("This test does not scale over multiple versions of unity")
     @Unroll("when: #buildTarget")
     def "task :checkUnityInstallation #message when task contains buildTarget: #buildTarget"() {
         given: "A project with a mocked unity version"
@@ -215,11 +214,14 @@ class UvmCheckInstalltionIntegrationSpec extends IntegrationSpec {
         new File(projectDir, installPath).deleteDir()
 
         where:
-        editorVersion = unityTestVersion()
+        editorVersion       | buildTarget           | expectedComponent
+        unityTestVersion()  | BuildTarget.android   | Component.android
+        unityTestVersion()  | BuildTarget.ios       | Component.ios
+        unityTestVersion()  | BuildTarget.linux64   | Component.linuxMono
+        unityTestVersion()  | BuildTarget.win64     | Component.windowsMono
+
         installPath = "build/unity_installations/${editorVersion}"
         baseVersion = preInstalledUnity2019_4_31f1
-        buildTarget << BuildTarget.values().toList()
-        expectedComponent << BuildTarget.values().collect { UnityVersionManagerPlugin.buildTargetToComponent(it) }
         message = expectedComponent ? "installs: ${expectedComponent}" : "installs no component"
     }
 
@@ -272,6 +274,7 @@ class UvmCheckInstalltionIntegrationSpec extends IntegrationSpec {
         editorVersion = unityTestVersion()
         installPath = "build/unity_installations/${editorVersion}"
         baseVersion = preInstalledUnity2019_4_31f1
+
         buildTarget1 = BuildTarget.ios
         buildTarget2 = BuildTarget.android
         expectedComponent1 = Component.ios
