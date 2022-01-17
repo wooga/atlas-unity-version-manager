@@ -200,7 +200,9 @@ class UvmCheckInstalltionIntegrationSpec extends IntegrationSpec {
         buildFile << "customUnity.buildTarget = '${buildTarget}'"
 
         when:
-        runTasksSuccessfully("customUnity")
+        if (System.getProperty("os.name").toLowerCase().contains(platform)) {
+            runTasksSuccessfully("customUnity")
+        }
 
         then:
         if (expectedComponent) {
@@ -214,11 +216,14 @@ class UvmCheckInstalltionIntegrationSpec extends IntegrationSpec {
         new File(projectDir, installPath).deleteDir()
 
         where:
-        editorVersion       | buildTarget           | expectedComponent
-        unityTestVersion()  | BuildTarget.android   | [Component.android]
-        unityTestVersion()  | BuildTarget.ios       | [Component.ios]
-        unityTestVersion()  | BuildTarget.linux64   | [Component.linuxMono, Component.linuxIL2CPP]
-        unityTestVersion()  | BuildTarget.win64     | [Component.windowsMono]
+        platform  | editorVersion       | buildTarget           | expectedComponent
+        ""        | unityTestVersion()  | BuildTarget.android   | [Component.android]
+        ""        | unityTestVersion()  | BuildTarget.ios       | [Component.ios]
+        ""        | unityTestVersion()  | BuildTarget.win64     | [Component.windowsMono]
+        "linux"   | unityTestVersion()  | BuildTarget.linux64   | [Component.linuxIL2CPP]
+        "linux"   | unityTestVersion()  | BuildTarget.osx       | [Component.macMono]
+        "mac os"  | unityTestVersion()  | BuildTarget.linux64   | [Component.linuxMono, Component.linuxIL2CPP]
+        "mac os"  | unityTestVersion()  | BuildTarget.osx       | [Component.macMono, Component.macIL2CPP]
 
         installPath = "build/unity_installations/${editorVersion}"
         baseVersion = preInstalledUnity2019_4_31f1

@@ -148,7 +148,12 @@ class UnityVersionManagerPlugin implements Plugin<Project> {
     }
 
     static List<Component> buildTargetToComponents(String target, String versionString) {
-        ArtifactVersion version = new DefaultArtifactVersion(versionString.split(/f|p|b|a/).first().toString())
+        def version = new DefaultArtifactVersion(versionString.split(/f|p|b|a/).first().toString())
+        def osName = System.getProperty("os.name").toLowerCase()
+        def isWindows = osName.contains("windows")
+        def isLinux = osName.contains("linux")
+        def isMac = osName.contains("mac os")
+
         def components = []
         switch (target.toLowerCase()) {
             case "android":
@@ -163,35 +168,47 @@ class UnityVersionManagerPlugin implements Plugin<Project> {
             case "webgl":
                 components.add(Component.webGl)
                 break
-            case "linux":
-            case "linux64":
-            case "linuxuniversal":
-                if (version.majorVersion >= 2019) {
-                    components.addAll(Component.linuxMono, Component.linuxIL2CPP)
-                } else {
-                    components.add(Component.linux)
-                }
-                break
             case "lumin":
                 components.add(Component.lumin)
                 break
-            case 'osxuniversal':
-                if (version.majorVersion >= 2019) {
-                    components.addAll(Component.macMono, Component.macIL2CPP)
-                } else {
-                    components.add(Component.mac)
-                }
-                break
-            case "win32":
-            case "win64":
-                if (!System.getProperty("os.name").toLowerCase().startsWith("windows")) {
-                    if (version.majorVersion >= 2019) {
-                        components.addAll(Component.windowsMono)
-                    } else {
-                        components.add(Component.windows)
-                    }
-                }
-                break
+        }
+
+        // The Component.<x>Mono doesn't exist on platform <x> as individual component, but is part of Editor component.
+        // Component.<x>IL2CPP usually only exists on platform <x> itself, Linux is an exception.
+        if (version.majorVersion >= 2019) {
+            switch (target.toLowerCase()) {
+                case "linux":
+                case "linux64":
+                case "linuxuniversal":
+                    if (!isLinux) components.add(Component.linuxMono)
+                    // all three platforms support linux I2CPP (cross-)compilation
+                    if (isLinux || isWindows || isMac) components.(Component.linuxIL2CPP)
+                    break
+                case 'osxuniversal':
+                    if (!isMac) components.add(Component.macMono)
+                    if (isMac) components.add(Component.macIL2CPP)
+                    break
+                case "win32":
+                case "win64":
+                    if (!isWindows) components.add(Component.windowsMono)
+                    if (isWindows) components.add(Component.windowsIL2CCP)
+                    break
+            }
+        } else {
+            switch (target.toLowerCase()) {
+                case "linux":
+                case "linux64":
+                case "linuxuniversal":
+                    if (!isLinux) components.add(Component.linux)
+                    break
+                case 'osxuniversal':
+                    if (!isMac) components.add(Component.mac)
+                    break
+                case "win32":
+                case "win64":
+                    if (!isWindows) components.add(Component.windows)
+                    break
+            }
         }
 
         components
