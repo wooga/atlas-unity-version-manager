@@ -176,7 +176,7 @@ class UvmCheckInstalltionIntegrationSpec extends IntegrationSpec {
         baseVersion = preInstalledUnity2019_4_31f1
     }
 
-    @Unroll("when: #buildTarget")
+    @Unroll("when: #buildTarget #message")
     def "task :checkUnityInstallation #message when task contains buildTarget: #buildTarget"() {
         given: "A project with a mocked unity version"
         unityProject.setProjectVersion(editorVersion)
@@ -280,7 +280,6 @@ class UvmCheckInstalltionIntegrationSpec extends IntegrationSpec {
         editorVersion = unityTestVersion()
         installPath = "build/unity_installations/${editorVersion}"
         baseVersion = preInstalledUnity2019_4_31f1
-
         buildTarget1 = BuildTarget.ios
         buildTarget2 = BuildTarget.android
         expectedComponent1 = Component.ios
