@@ -204,7 +204,7 @@ class UvmCheckInstalltionIntegrationSpec extends IntegrationSpec {
 
         then:
         if (expectedComponent) {
-            installation.components.contains(expectedComponent)
+            installation.components.equals(expectedComponent)
         } else {
             installation.components.size() == 0
         }
@@ -215,10 +215,10 @@ class UvmCheckInstalltionIntegrationSpec extends IntegrationSpec {
 
         where:
         editorVersion       | buildTarget           | expectedComponent
-        unityTestVersion()  | BuildTarget.android   | Component.android
-        unityTestVersion()  | BuildTarget.ios       | Component.ios
-        unityTestVersion()  | BuildTarget.linux64   | Component.linuxMono
-        unityTestVersion()  | BuildTarget.win64     | Component.windowsMono
+        unityTestVersion()  | BuildTarget.android   | [Component.android]
+        unityTestVersion()  | BuildTarget.ios       | [Component.ios]
+        unityTestVersion()  | BuildTarget.linux64   | [Component.linuxMono, Component.linuxIL2CPP]
+        unityTestVersion()  | BuildTarget.win64     | [Component.windowsMono]
 
         installPath = "build/unity_installations/${editorVersion}"
         baseVersion = preInstalledUnity2019_4_31f1

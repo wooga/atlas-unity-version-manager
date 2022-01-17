@@ -126,67 +126,91 @@ class UnityVersionManagerPlugin implements Plugin<Project> {
                         true
                     })
                     .collect({
-                        buildTargetToComponents(it.buildTarget.get(), extension.unityVersion.get())
+                        BuildTargetToComponents.buildTargetToComponents(it.buildTarget, extension.unityVersion)
                     })
+        }).flatMap(new Transformer<Provider<List<Component>>, List<Provider<List<Component>>>>() {
+            @Override
+            Provider<List<Component>> transform(List<Provider<List<Component>>> providers) {
+                project.provider({
+                    providers.collectMany {it.getOrElse([]) }
+                })
+            }
         }))
         extension
     }
 
+    static Component buildTargetToComponent(BuildTarget target) {
+        buildTargetToComponent(target.toString())
+    }
+
+    static Component buildTargetToComponent(String target) {
+        buildTargetToComponents(target, "2018").first()
+    }
+
     static List<Component> buildTargetToComponents(String target, String versionString) {
-        Component component = Component.unknown
         ArtifactVersion version = new DefaultArtifactVersion(versionString.split(/f|p|b|a/).first().toString())
+        def components = []
         switch (target.toLowerCase()) {
             case "android":
-                component = Component.android
+                components.add(Component.android)
                 break
             case "ios":
-                component = Component.ios
+                components.add(Component.ios)
                 break
             case "tvos":
-                component = Component.tvOs
+                components.add(Component.tvOs)
                 break
             case "webgl":
-                component = Component.webGl
+                components.add(Component.webGl)
                 break
             case "linux":
             case "linux64":
             case "linuxuniversal":
-                component = Component.linux
+                if (version.majorVersion >= 2019) {
+                    components.addAll(Component.linuxMono, Component.linuxIL2CPP)
+                } else {
+                    components.add(Component.linux)
+                }
                 break
             case "lumin":
-                component = Component.lumin
+                components.add(Component.lumin)
                 break
             case 'osxuniversal':
-                component = Component.mac
+                if (version.majorVersion >= 2019) {
+                    components.addAll(Component.macMono, Component.macIL2CPP)
+                } else {
+                    components.add(Component.mac)
+                }
                 break
             case "win32":
             case "win64":
                 if (!System.getProperty("os.name").toLowerCase().startsWith("windows")) {
-                    component = Component.windowsMono
+                    if (version.majorVersion >= 2019) {
+                        components.addAll(Component.windowsMono)
+                    } else {
+                        components.add(Component.windows)
+                    }
                 }
                 break
         }
 
-        if (version.majorVersion >= 2019) {
-            switch (target.toLowerCase()) {
-                case "linux64":
-                    component = Component.linuxMono
-                    break
-            }
-        }
-
-        [component]
+        components
     }
 
-//    private static class BuildTargetToComponents implements Transformer<List<Component>, String> {
-//        static Provider<List<Component>> buildTargetToComponents(Provider<String> buildTarget, Provider<String> version) {
-//            buildTarget.map(new BuildTargetToComponents())
-//        }
-//
-//        @Override
-//        List<Component> transform(String target) {
-//            // Android, Linux, Linux64, LinuxUniversal, Lumin, OSXUniversal, PS4, Switch, WebGL, Win, Win64, WindowsStoreApps, XboxOne, iOS, tvOS
-//            buildTargetToComponent(target, null)
-//        }
-//    }
+    private static class BuildTargetToComponents implements Transformer<List<Component>, String> {
+        private Provider<String> version
+
+        static Provider<List<Component>> buildTargetToComponents(Provider<String> buildTarget, Provider<String> version) {
+             buildTarget.map(new BuildTargetToComponents(version))
+        }
+
+        BuildTargetToComponents(Provider<String> version) {
+            this.version = version
+        }
+
+        @Override
+        List<Component> transform(String target) {
+            buildTargetToComponents(target, version.get())
+        }
+    }
 }
