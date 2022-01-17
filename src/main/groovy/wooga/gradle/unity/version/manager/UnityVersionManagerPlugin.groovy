@@ -194,6 +194,23 @@ class UnityVersionManagerPlugin implements Plugin<Project> {
                     if (isWindows) components.add(Component.windowsIL2CCP)
                     break
             }
+        } else if (version.majorVersion == 2018) {
+            switch (target.toLowerCase()) {
+                case "linux":
+                case "linux64":
+                case "linuxuniversal":
+                    if (!isLinux) components.add(Component.linux)
+                    break
+                case 'osxuniversal':
+                    if (!isMac) components.add(Component.macMono)
+                    if (isMac) components.add(Component.macIL2CPP)
+                    break
+                case "win32":
+                case "win64":
+                    if (!isWindows) components.add(Component.windowsMono)
+                    if (isWindows) components.add(Component.windowsIL2CCP)
+                    break
+            }
         } else {
             switch (target.toLowerCase()) {
                 case "linux":
