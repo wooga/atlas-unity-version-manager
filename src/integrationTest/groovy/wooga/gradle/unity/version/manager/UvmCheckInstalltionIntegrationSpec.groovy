@@ -205,8 +205,8 @@ class UvmCheckInstalltionIntegrationSpec extends IntegrationSpec {
         }
 
         then:
-        if (expectedComponent) {
-            installation.components.equals(expectedComponent)
+        if (expectedComponents) {
+            installation.components.equals(expectedComponents)
         } else {
             installation.components.size() == 0
         }
@@ -216,7 +216,7 @@ class UvmCheckInstalltionIntegrationSpec extends IntegrationSpec {
         new File(projectDir, installPath).deleteDir()
 
         where:
-        platform  | editorVersion       | buildTarget           | expectedComponent
+        platform  | editorVersion       | buildTarget           | expectedComponents
         ""        | unityTestVersion()  | BuildTarget.android   | [Component.android]
         ""        | unityTestVersion()  | BuildTarget.ios       | [Component.ios]
         ""        | unityTestVersion()  | BuildTarget.win64     | [Component.windowsMono]
@@ -227,7 +227,7 @@ class UvmCheckInstalltionIntegrationSpec extends IntegrationSpec {
 
         installPath = "build/unity_installations/${editorVersion}"
         baseVersion = preInstalledUnity2019_4_31f1
-        message = expectedComponent ? "installs: ${expectedComponent}" : "installs no component"
+        message = expectedComponents ? "installs: ${expectedComponents}" : "installs no component"
     }
 
     @Unroll("installs missing components")
