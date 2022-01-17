@@ -222,7 +222,7 @@ class UvmCheckInstalltionIntegrationSpec extends IntegrationSpec {
         ""        | unityTestVersion()  | BuildTarget.win64     | [Component.windowsMono]
         "linux"   | unityTestVersion()  | BuildTarget.linux64   | [Component.linuxIL2CPP]
         "linux"   | unityTestVersion()  | BuildTarget.osx       | [Component.macMono]
-        "linux"   | "2018.4.30f1"       | BuildTarget.linux     | [Component.linux]
+        "mac os"  | "2018.4.30f1"       | BuildTarget.linux     | [Component.linux]
         "mac os"  | unityTestVersion()  | BuildTarget.linux64   | [Component.linuxMono, Component.linuxIL2CPP]
         "mac os"  | unityTestVersion()  | BuildTarget.osx       | [Component.macMono, Component.macIL2CPP]
 
