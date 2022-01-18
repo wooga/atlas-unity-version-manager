@@ -182,18 +182,18 @@ class UnityVersionManagerPlugin implements Plugin<Project> {
                 case "linux":
                 case "linux64":
                 case "linuxuniversal":
-                    if (!isLinux) components.add(Component.linuxMono)
                     // all three platforms support linux I2CPP (cross-)compilation
-                    if (isLinux || isWindows || isMac) components.(Component.linuxIL2CPP)
+                    components.(Component.linuxIL2CPP)
+                    if (!isLinux) components.add(Component.linuxMono)
                     break
                 case 'osxuniversal':
-                    if (!isMac) components.add(Component.macMono)
                     if (isMac) components.add(Component.macIL2CPP)
+                    else components.add(Component.macMono)
                     break
                 case "win32":
                 case "win64":
-                    if (!isWindows) components.add(Component.windowsMono)
                     if (isWindows) components.add(Component.windowsIL2CCP)
+                    else components.add(Component.windowsMono)
                     break
             }
         } else if (version.majorVersion == 2018) {
@@ -204,13 +204,13 @@ class UnityVersionManagerPlugin implements Plugin<Project> {
                     if (!isLinux) components.add(Component.linux)
                     break
                 case 'osxuniversal':
-                    if (!isMac) components.add(Component.macMono)
                     if (isMac) components.add(Component.macIL2CPP)
+                    else components.add(Component.macMono)
                     break
                 case "win32":
                 case "win64":
-                    if (!isWindows) components.add(Component.windowsMono)
                     if (isWindows) components.add(Component.windowsIL2CCP)
+                    else components.add(Component.windowsMono)
                     break
             }
         } else {
