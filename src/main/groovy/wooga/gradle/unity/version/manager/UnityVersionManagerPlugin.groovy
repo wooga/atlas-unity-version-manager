@@ -17,6 +17,7 @@
 
 package wooga.gradle.unity.version.manager
 
+import com.wooga.gradle.PlatformUtils
 import net.wooga.uvm.Component
 import net.wooga.uvm.UnityVersionManager
 import org.gradle.api.Action
@@ -38,7 +39,6 @@ import wooga.gradle.unity.version.manager.tasks.UvmCheckInstallation
 import wooga.gradle.unity.version.manager.tasks.UvmInstallUnity
 import wooga.gradle.unity.version.manager.tasks.UvmListInstallations
 import wooga.gradle.unity.version.manager.tasks.UvmVersion
-import org.apache.maven.artifact.versioning.ArtifactVersion
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion
 
 class UnityVersionManagerPlugin implements Plugin<Project> {
@@ -151,10 +151,6 @@ class UnityVersionManagerPlugin implements Plugin<Project> {
 
     static List<Component> buildTargetToComponents(String target, String versionString) {
         def version = new DefaultArtifactVersion(versionString.split(/f|p|b|a/).first().toString())
-        def osName = System.getProperty("os.name").toLowerCase()
-        def isWindows = osName.contains("windows")
-        def isLinux = osName.contains("linux")
-        def isMac = osName.contains("mac os")
 
         def components = []
         switch (target.toLowerCase()) {
@@ -184,15 +180,15 @@ class UnityVersionManagerPlugin implements Plugin<Project> {
                 case "linuxuniversal":
                     // all three platforms support linux I2CPP (cross-)compilation
                     components.(Component.linuxIL2CPP)
-                    if (!isLinux) components.add(Component.linuxMono)
+                    if (!PlatformUtils.isLinux()) components.add(Component.linuxMono)
                     break
                 case 'osxuniversal':
-                    if (isMac) components.add(Component.macIL2CPP)
+                    if (PlatformUtils.isMac()) components.add(Component.macIL2CPP)
                     else components.add(Component.macMono)
                     break
                 case "win32":
                 case "win64":
-                    if (isWindows) components.add(Component.windowsIL2CCP)
+                    if (PlatformUtils.isWindows()) components.add(Component.windowsIL2CCP)
                     else components.add(Component.windowsMono)
                     break
             }
@@ -201,15 +197,15 @@ class UnityVersionManagerPlugin implements Plugin<Project> {
                 case "linux":
                 case "linux64":
                 case "linuxuniversal":
-                    if (!isLinux) components.add(Component.linux)
+                    if (!PlatformUtils.isLinux()) components.add(Component.linux)
                     break
                 case 'osxuniversal':
-                    if (isMac) components.add(Component.macIL2CPP)
+                    if (PlatformUtils.isMac()) components.add(Component.macIL2CPP)
                     else components.add(Component.macMono)
                     break
                 case "win32":
                 case "win64":
-                    if (isWindows) components.add(Component.windowsIL2CCP)
+                    if (PlatformUtils.isWindows()) components.add(Component.windowsIL2CCP)
                     else components.add(Component.windowsMono)
                     break
             }
@@ -218,14 +214,14 @@ class UnityVersionManagerPlugin implements Plugin<Project> {
                 case "linux":
                 case "linux64":
                 case "linuxuniversal":
-                    if (!isLinux) components.add(Component.linux)
+                    if (!PlatformUtils.isLinux()) components.add(Component.linux)
                     break
                 case 'osxuniversal':
-                    if (!isMac) components.add(Component.mac)
+                    if (!PlatformUtils.isMac()) components.add(Component.mac)
                     break
                 case "win32":
                 case "win64":
-                    if (!isWindows) components.add(Component.windows)
+                    if (!PlatformUtils.isWindows()) components.add(Component.windows)
                     break
             }
         }
