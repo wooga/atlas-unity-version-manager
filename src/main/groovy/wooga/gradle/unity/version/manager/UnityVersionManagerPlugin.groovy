@@ -139,12 +139,14 @@ class UnityVersionManagerPlugin implements Plugin<Project> {
         extension
     }
 
+    @Deprecated
     static Component buildTargetToComponent(BuildTarget target) {
         buildTargetToComponent(target.toString())
     }
 
+    @Deprecated
     static Component buildTargetToComponent(String target) {
-        buildTargetToComponents(target, "2018").first()
+        buildTargetToComponents(target, "2017.1.1f1").first()
     }
 
     static List<Component> buildTargetToComponents(String target, String versionString) {
