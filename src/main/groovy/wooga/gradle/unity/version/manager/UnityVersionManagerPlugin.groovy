@@ -17,7 +17,7 @@
 
 package wooga.gradle.unity.version.manager
 
-import com.wooga.gradle.PlatformUtils
+import wooga.gradle.unity.utils.PlatformUtils
 import net.wooga.uvm.Component
 import net.wooga.uvm.UnityVersionManager
 import org.gradle.api.Action
