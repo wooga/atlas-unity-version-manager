@@ -49,6 +49,7 @@ dependencies {
     implementation 'net.wooga:unity-version-manager-jni:[1.4.1,2)'
     implementation "gradle.plugin.net.wooga.gradle:atlas-unity:[2,3)"
     implementation "com.wooga.gradle:gradle-commons:0.1.0"
+    implementation 'org.apache.maven:maven-artifact:3.8.1'
     testImplementation 'net.wooga.test:unity-project-generator-rule:0.3.0'
     testImplementation "com.wooga.spock.extensions:spock-unity-version-manager-extension:0.2.0"
 }

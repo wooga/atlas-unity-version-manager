@@ -17,6 +17,7 @@
 
 package wooga.gradle.unity.version.manager
 
+import wooga.gradle.unity.utils.PlatformUtils
 import net.wooga.uvm.Component
 import net.wooga.uvm.UnityVersionManager
 import org.gradle.api.Action
@@ -38,6 +39,7 @@ import wooga.gradle.unity.version.manager.tasks.UvmCheckInstallation
 import wooga.gradle.unity.version.manager.tasks.UvmInstallUnity
 import wooga.gradle.unity.version.manager.tasks.UvmListInstallations
 import wooga.gradle.unity.version.manager.tasks.UvmVersion
+import org.apache.maven.artifact.versioning.DefaultArtifactVersion
 
 class UnityVersionManagerPlugin implements Plugin<Project> {
 
@@ -124,70 +126,123 @@ class UnityVersionManagerPlugin implements Plugin<Project> {
                         true
                     })
                     .collect({
-                BuildTargetToComponent.buildTargetToComponent(it.buildTarget)
-            })
-        }).flatMap(new Transformer<Provider<List<Component>>, List<Provider<Component>>>() {
+                        BuildTargetToComponents.buildTargetToComponents(it.buildTarget, extension.unityVersion)
+                    })
+        }).flatMap(new Transformer<Provider<List<Component>>, List<Provider<List<Component>>>>() {
             @Override
-            Provider<List<Component>> transform(List<Provider<Component>> providers) {
+            Provider<List<Component>> transform(List<Provider<List<Component>>> providers) {
                 project.provider({
-                    providers.collect {
-                        it.getOrElse(Component.unknown)
-                    }.findAll {it != Component.unknown }
+                    providers.collectMany {it.getOrElse([]) }
                 })
             }
         }))
         extension
     }
 
+    @Deprecated
     static Component buildTargetToComponent(BuildTarget target) {
         buildTargetToComponent(target.toString())
     }
 
+    @Deprecated
     static Component buildTargetToComponent(String target) {
-        Component component = Component.unknown
-        switch (target.toLowerCase()) {
-            case "android":
-                component = Component.android
-                break
-            case "ios":
-                component = Component.ios
-                break
-            case "tvos":
-                component = Component.tvOs
-                break
-            case "webgl":
-                component = Component.webGl
-                break
-            case "linux":
-            case "linux64":
-            case "linuxuniversal":
-                component = Component.linux
-                break
-            case "lumin":
-                component = Component.lumin
-                break
-            case 'osxuniversal':
-                component = Component.mac
-                break
-            case "win32":
-            case "win64":
-                if (!System.getProperty("os.name").toLowerCase().startsWith("windows")) {
-                    component = Component.windows
-                }
-                break
-        }
-        component
+        buildTargetToComponents(target, "2017.1.1f1").first()
     }
 
-    private static class BuildTargetToComponent implements Transformer<Component, String> {
-        static Provider<Component> buildTargetToComponent(Provider<String> buildTarget) {
-            buildTarget.map(new BuildTargetToComponent())
+    static List<Component> buildTargetToComponents(String target, String versionString) {
+        def version = new DefaultArtifactVersion(versionString.split(/f|p|b|a/).first().toString())
+
+        def components = []
+        switch (target.toLowerCase()) {
+            case "android":
+                components.add(Component.android)
+                break
+            case "ios":
+                components.add(Component.ios)
+                break
+            case "tvos":
+                components.add(Component.tvOs)
+                break
+            case "webgl":
+                components.add(Component.webGl)
+                break
+            case "lumin":
+                components.add(Component.lumin)
+                break
+        }
+
+        // The Component.<x>Mono doesn't exist on platform <x> as individual component, but is part of Editor component.
+        // Component.<x>IL2CPP usually only exists on platform <x> itself, Linux is an exception.
+        if (version.majorVersion >= 2019) {
+            switch (target.toLowerCase()) {
+                case "linux":
+                case "linux64":
+                case "linuxuniversal":
+                    // all three platforms support linux I2CPP (cross-)compilation
+                    components.(Component.linuxIL2CPP)
+                    if (!PlatformUtils.isLinux()) components.add(Component.linuxMono)
+                    break
+                case 'osxuniversal':
+                    if (PlatformUtils.isMac()) components.add(Component.macIL2CPP)
+                    else components.add(Component.macMono)
+                    break
+                case "win32":
+                case "win64":
+                    if (PlatformUtils.isWindows()) components.add(Component.windowsIL2CCP)
+                    else components.add(Component.windowsMono)
+                    break
+            }
+        } else if (version.majorVersion == 2018) {
+            switch (target.toLowerCase()) {
+                case "linux":
+                case "linux64":
+                case "linuxuniversal":
+                    if (!PlatformUtils.isLinux()) components.add(Component.linux)
+                    break
+                case 'osxuniversal':
+                    if (PlatformUtils.isMac()) components.add(Component.macIL2CPP)
+                    else components.add(Component.macMono)
+                    break
+                case "win32":
+                case "win64":
+                    if (PlatformUtils.isWindows()) components.add(Component.windowsIL2CCP)
+                    else components.add(Component.windowsMono)
+                    break
+            }
+        } else {
+            switch (target.toLowerCase()) {
+                case "linux":
+                case "linux64":
+                case "linuxuniversal":
+                    if (!PlatformUtils.isLinux()) components.add(Component.linux)
+                    break
+                case 'osxuniversal':
+                    if (!PlatformUtils.isMac()) components.add(Component.mac)
+                    break
+                case "win32":
+                case "win64":
+                    if (!PlatformUtils.isWindows()) components.add(Component.windows)
+                    break
+            }
+        }
+
+        components
+    }
+
+    private static class BuildTargetToComponents implements Transformer<List<Component>, String> {
+        private Provider<String> version
+
+        static Provider<List<Component>> buildTargetToComponents(Provider<String> buildTarget, Provider<String> version) {
+             buildTarget.map(new BuildTargetToComponents(version))
+        }
+
+        BuildTargetToComponents(Provider<String> version) {
+            this.version = version
         }
 
         @Override
-        Component transform(String target) {
-            // Android, Linux, Linux64, LinuxUniversal, Lumin, OSXUniversal, PS4, Switch, WebGL, Win, Win64, WindowsStoreApps, XboxOne, iOS, tvOS
-            buildTargetToComponent(target)
+        List<Component> transform(String target) {
+            buildTargetToComponents(target, version.get())
         }
     }
 }

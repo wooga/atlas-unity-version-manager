@@ -176,8 +176,7 @@ class UvmCheckInstalltionIntegrationSpec extends IntegrationSpec {
         baseVersion = preInstalledUnity2019_4_31f1
     }
 
-    @Ignore("This test does not scale over multiple versions of unity")
-    @Unroll("when: #buildTarget")
+    @Unroll("when: #buildTarget #message")
     def "task :checkUnityInstallation #message when task contains buildTarget: #buildTarget"() {
         given: "A project with a mocked unity version"
         unityProject.setProjectVersion(editorVersion)
@@ -201,11 +200,13 @@ class UvmCheckInstalltionIntegrationSpec extends IntegrationSpec {
         buildFile << "customUnity.buildTarget = '${buildTarget}'"
 
         when:
-        runTasksSuccessfully("customUnity")
+        if (System.getProperty("os.name").toLowerCase().contains(platform)) {
+            runTasksSuccessfully("customUnity")
+        }
 
         then:
-        if (expectedComponent) {
-            installation.components.contains(expectedComponent)
+        if (expectedComponents) {
+            installation.components.equals(expectedComponents)
         } else {
             installation.components.size() == 0
         }
@@ -215,12 +216,19 @@ class UvmCheckInstalltionIntegrationSpec extends IntegrationSpec {
         new File(projectDir, installPath).deleteDir()
 
         where:
-        editorVersion = unityTestVersion()
+        platform  | editorVersion       | buildTarget           | expectedComponents
+        ""        | unityTestVersion()  | BuildTarget.android   | [Component.android]
+        ""        | unityTestVersion()  | BuildTarget.ios       | [Component.ios]
+        ""        | unityTestVersion()  | BuildTarget.win64     | [Component.windowsMono]
+        "linux"   | unityTestVersion()  | BuildTarget.linux64   | [Component.linuxIL2CPP]
+        "linux"   | unityTestVersion()  | BuildTarget.osx       | [Component.macMono]
+        "mac os"  | "2018.4.30f1"       | BuildTarget.linux     | [Component.linux]
+        "mac os"  | unityTestVersion()  | BuildTarget.linux64   | [Component.linuxMono, Component.linuxIL2CPP]
+        "mac os"  | unityTestVersion()  | BuildTarget.osx       | [Component.macMono, Component.macIL2CPP]
+
         installPath = "build/unity_installations/${editorVersion}"
         baseVersion = preInstalledUnity2019_4_31f1
-        buildTarget << BuildTarget.values().toList()
-        expectedComponent << BuildTarget.values().collect { UnityVersionManagerPlugin.buildTargetToComponent(it) }
-        message = expectedComponent ? "installs: ${expectedComponent}" : "installs no component"
+        message = expectedComponents ? "installs: ${expectedComponents}" : "installs no component"
     }
 
     @Unroll("installs missing components")
