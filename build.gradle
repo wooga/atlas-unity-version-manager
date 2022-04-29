@@ -16,7 +16,10 @@
  */
 
 plugins {
-    id 'net.wooga.plugins' version '2.2.4'
+    id 'net.wooga.plugins' version '2.3.0'
+    id 'net.wooga.snyk' version '0.10.0'
+    id "net.wooga.snyk-gradle-plugin" version "0.2.0"
+    id "net.wooga.cve-dependency-resolution" version "0.4.0"
 }
 
 group 'net.wooga.gradle'
@@ -40,28 +43,23 @@ github {
     repositoryName = "wooga/atlas-unity-version-manager"
 }
 
+
+cveHandler {
+    configurations("compileClasspath", "runtimeClasspath", "testCompileClasspath", "testRuntimeClasspath", "integrationTestCompileClasspath", "integrationTestRuntimeClasspath")
+}
+
 repositories {
     mavenCentral()
     maven { url 'https://repo.gradle.org/gradle/libs-releases' }
 }
 
 dependencies {
-    implementation 'net.wooga:unity-version-manager-jni:[1.4.1,2)'
-    implementation "gradle.plugin.net.wooga.gradle:atlas-unity:[2,3)"
-    implementation "com.wooga.gradle:gradle-commons:0.5.0"
+    implementation 'net.wooga:unity-version-manager-jni:[1.4.1,2['
+    implementation "gradle.plugin.net.wooga.gradle:atlas-unity:[2,3["
+    implementation "com.wooga.gradle:gradle-commons:[1,2["
     implementation 'org.apache.maven:maven-artifact:3.8.1'
-    testImplementation 'net.wooga.test:unity-project-generator-rule:0.3.0'
-    testImplementation "com.wooga.spock.extensions:spock-unity-version-manager-extension:0.2.0"
-}
-
-configurations.all {
-    resolutionStrategy {
-        force 'org.codehaus.groovy:groovy-all:2.5.12'
-        force 'org.codehaus.groovy:groovy-macro:2.5.12'
-        force 'org.codehaus.groovy:groovy-nio:2.5.12'
-        force 'org.codehaus.groovy:groovy-sql:2.5.12'
-        force 'org.codehaus.groovy:groovy-xml:2.5.12'
-    }
+    testImplementation 'net.wooga.test:unity-project-generator-rule:0.4.0'
+    testImplementation "com.wooga.spock.extensions:spock-unity-version-manager-extension:0.3.0"
 }
 
 integrationTest {
