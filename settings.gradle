@@ -21,4 +21,4 @@ pluginManagement {
   }
 }
 
-rootProject.name = 'atlas-unity-version-manager'
+rootProject.name = 'unity-version-manager'
