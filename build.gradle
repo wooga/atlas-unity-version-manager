@@ -16,7 +16,7 @@
  */
 
 plugins {
-    id 'net.wooga.plugins' version '2.3.0'
+    id 'net.wooga.plugins' version '3.2.0'
     id 'net.wooga.snyk' version '0.10.0'
     id "net.wooga.snyk-gradle-plugin" version "0.2.0"
     id "net.wooga.cve-dependency-resolution" version "0.4.0"
@@ -29,12 +29,14 @@ pluginBundle {
     website = 'https://wooga.github.io/atlas-unity/'
     vcsUrl = 'https://github.com/wooga/atlas-unity'
     tags = ['Unity3D']
-
+}
+gradlePlugin {
     plugins {
         unityVersionManager {
             id = 'net.wooga.unity-version-manager'
             displayName = 'Gradle Unity version manager'
             description = 'This plugin provides tasks to manage and downloads unity versions'
+            implementationClass = 'wooga.gradle.unity.version.manager.UnityVersionManagerPlugin'
         }
     }
 }
@@ -42,7 +44,6 @@ pluginBundle {
 github {
     repositoryName = "wooga/atlas-unity-version-manager"
 }
-
 
 cveHandler {
     configurations("compileClasspath", "runtimeClasspath", "testCompileClasspath", "testRuntimeClasspath", "integrationTestCompileClasspath", "integrationTestRuntimeClasspath")
@@ -55,7 +56,7 @@ repositories {
 
 dependencies {
     implementation 'net.wooga:unity-version-manager-jni:[1.4.1,2['
-    implementation "gradle.plugin.net.wooga.gradle:atlas-unity:[2,3["
+    implementation "net.wooga.gradle:unity:[3,4["
     implementation "com.wooga.gradle:gradle-commons:[1,2["
     implementation 'org.apache.maven:maven-artifact:3.8.1'
     testImplementation 'net.wooga.test:unity-project-generator-rule:0.4.0'

@@ -17,20 +17,17 @@
 
 package wooga.gradle.unity.version.manager
 
-import wooga.gradle.unity.utils.PlatformUtils
+import com.wooga.gradle.PlatformUtils
 import net.wooga.uvm.Component
 import net.wooga.uvm.UnityVersionManager
-import org.gradle.api.Action
+import org.apache.maven.artifact.versioning.DefaultArtifactVersion
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Transformer
-import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.logging.Logger
 import org.gradle.api.logging.Logging
 import org.gradle.api.provider.Provider
-import org.gradle.api.provider.SetProperty
 import wooga.gradle.unity.UnityPlugin
-import wooga.gradle.unity.UnityPluginConventions
 import wooga.gradle.unity.UnityPluginExtension
 import wooga.gradle.unity.UnityTask
 import wooga.gradle.unity.models.BuildTarget
@@ -39,7 +36,6 @@ import wooga.gradle.unity.version.manager.tasks.UvmCheckInstallation
 import wooga.gradle.unity.version.manager.tasks.UvmInstallUnity
 import wooga.gradle.unity.version.manager.tasks.UvmListInstallations
 import wooga.gradle.unity.version.manager.tasks.UvmVersion
-import org.apache.maven.artifact.versioning.DefaultArtifactVersion
 
 class UnityVersionManagerPlugin implements Plugin<Project> {
 
