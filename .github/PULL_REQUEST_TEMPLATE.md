@@ -12,23 +12,22 @@ Add short description
 ## Changes
 * ![ADD] add new file x.cs
 * ![FIX] broken `String` in ...
-...
 
 
+[NEW]:      https://resources.atlas.wooga.com/icons/icon_new.svg "New"
+[ADD]:      https://resources.atlas.wooga.com/icons/icon_add.svg "Add"
+[IMPROVE]:  https://resources.atlas.wooga.com/icons/icon_improve.svg "Improve"
+[CHANGE]:   https://resources.atlas.wooga.com/icons/icon_change.svg "Change"
+[FIX]:      https://resources.atlas.wooga.com/icons/icon_fix.svg "Fix"
+[UPDATE]:   https://resources.atlas.wooga.com/icons/icon_update.svg "Update"
 
-
-[NEW]:https://atlas-resources.wooga.com/icons/icon_new.svg "New"
-[ADD]:http://atlas-resources.wooga.com/icons/icon_add.svg "Add"
-[IMPROVE]:http://atlas-resources.wooga.com/icons/icon_improve.svg "Improve"
-[CHANGE]:http://atlas-resources.wooga.com/icons/icon_change.svg "Change"
-[FIX]:http://atlas-resources.wooga.com/icons/icon_fix.svg "Fix"
-[UPDATE]:http://atlas-resources.wooga.com/icons/icon_update.svg "Update"
-
-[BREAK]:http://atlas-resources.wooga.com/icons/icon_break.svg "Break"
-[REMOVE]:http://atlas-resources.wooga.com/icons/icon_remove.svg "Remove"
-[IOS]:http://atlas-resources.wooga.com/icons/icon_iOS.svg "iOS"
-[ANDROID]:http://atlas-resources.wooga.com/icons/icon_android.svg "Android"
-[WEBGL]:http://atlas-resources.wooga.com/icons/icon_webGL.svg "Web:GL"
-[GRADLE]:http://atlas-resources.wooga.com/icons/icon_gradle.svg "Gradle"
-[UNITY]:http://atlas-resources.wooga.com/icons/icon_unity.svg "Unity"
-
+[BREAK]:    https://resources.atlas.wooga.com/icons/icon_break.svg "Remove"
+[REMOVE]:   https://resources.atlas.wooga.com/icons/icon_remove.svg "Remove"
+[IOS]:      https://resources.atlas.wooga.com/icons/icon_iOS.svg "iOS"
+[ANDROID]:  https://resources.atlas.wooga.com/icons/icon_android.svg "Android"
+[WEBGL]:    https://resources.atlas.wooga.com/icons/icon_webGL.svg "WebGL"
+[GRADLE]:   https://resources.atlas.wooga.com/icons/icon_gradle.svg "GRADLE"
+[UNITY]:    https://resources.atlas.wooga.com/icons/icon_unity.svg "Unity"
+[LINUX]:    https://resources.atlas.wooga.com/icons/icon_linux.svg "Linux"
+[WIN]:      https://resources.atlas.wooga.com/icons/icon_windows.svg "Windows"
+[MACOS]:    https://resources.atlas.wooga.com/icons/icon_iOS.svg "macOS"
