@@ -105,7 +105,7 @@ class UnityVersionManagerPlugin implements Plugin<Project> {
         def extension = project.extensions.create(UnityVersionManagerExtension, EXTENSION_NAME, DefaultUnityVersionManagerExtension, project)
         extension.unityProjectDir.convention(project.layout.projectDirectory)
         extension.unityVersion.convention(UnityVersionManagerConventions.unityVersion.getStringValueProvider(project).orElse(project.provider({
-            UnityVersionManager.detectProjectVersion(extension.unityProjectDir.get().asFile)
+            UnityVersionManager.detectProjectVersion(extension.unityProjectDir.get().asFile, true)
         })))
 
         extension.unityInstallBaseDir.convention(UnityVersionManagerConventions.unityInstallBaseDir.getDirectoryValueProvider(project).orElse(project.layout.buildDirectory.dir("unity_installations")))
