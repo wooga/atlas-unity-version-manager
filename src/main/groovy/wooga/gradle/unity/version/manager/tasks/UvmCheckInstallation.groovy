@@ -36,6 +36,23 @@ import wooga.gradle.unity.version.manager.error.UvmInstallException
 
 class UvmCheckInstallation extends DefaultTask implements BaseSpec {
 
+    private final SetProperty<Component> ignorableUnityComponents = objects.setProperty(Component)
+
+    @Input
+    @Optional
+    SetProperty<Component> getIgnorableUnityComponents() {
+        ignorableUnityComponents
+    }
+
+    void setIgnorableUnityComponents(Provider<Component> value) {
+        ignorableUnityComponents.set(value)
+    }
+
+    void setIgnorableUnityComponents(Set<Component> values) {
+        ignorableUnityComponents.set(values)
+    }
+
+
     private final Property<String> unityVersion = objects.property(String)
 
     @Input
@@ -176,8 +193,10 @@ class UvmCheckInstallation extends DefaultTask implements BaseSpec {
         }
 
         if (autoSwitchUnityEditor.get() && autoInstallUnityEditor.get() && needInstall) {
+            def ignorableComponents = ignorableUnityComponents.getOrElse(new HashSet<Component>())
+
+            def components = processComponents(version, ignorableComponents)
             def destination = unityInstallBaseDir.file(version_without_revision).get().asFile
-            def components = buildRequiredUnityComponents.getOrElse(new HashSet<Component>()).toArray() as Component[]
             logger.info("install unity ${version_without_revision}")
             if (components.size() > 0) {
                 logger.info("with components: ")
@@ -205,6 +224,25 @@ class UvmCheckInstallation extends DefaultTask implements BaseSpec {
             logger.info("update path to unity installtion ${installation.location}")
             def extension = unityExtension.get()
             extension.unityPath.set(installation.executable)
+        }
+    }
+
+    private Component[] processComponents(String version, Set<Component> ignorableComponents) {
+        def availableComponents = UnityVersionManager.listAvailableComponents(version)?.toList()
+        if(availableComponents) {
+            def presentIgnorableComponents = ignorableComponents.intersect(availableComponents)
+            return buildRequiredUnityComponents.map {
+                it.findAll {
+                    if(it in ignorableComponents && !(it in presentIgnorableComponents)) {
+                        logger.warn("Component $it not available in this platform (${System.getProperty("os.name")}). " +
+                                "It will not be used in unity $version installation")
+                        return false
+                    }
+                    return true
+                }
+            }.getOrElse(new HashSet<Component>()).toArray() as Component[]
+        } else {
+            return buildRequiredUnityComponents.getOrElse(new HashSet<Component>()).toArray()
         }
     }
 }
