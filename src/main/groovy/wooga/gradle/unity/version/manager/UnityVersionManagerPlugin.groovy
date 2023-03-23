@@ -79,6 +79,7 @@ class UnityVersionManagerPlugin implements Plugin<Project> {
             autoSwitchUnityEditor.convention(extension.autoSwitchUnityEditor)
             autoInstallUnityEditor.convention(extension.autoInstallUnityEditor)
             unityInstallBaseDir.convention(extension.unityInstallBaseDir)
+            ignorableUnityComponents.convention([Component.linuxMono, Component.macMono, Component.windowsMono])
         })
 
         project.plugins.withType(UnityPlugin).configureEach({

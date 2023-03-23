@@ -21,7 +21,6 @@ import net.wooga.test.unity.ProjectGeneratorRule
 import net.wooga.uvm.Component
 import net.wooga.uvm.UnityVersionManager
 import org.junit.Rule
-import spock.lang.Ignore
 import spock.lang.IgnoreIf
 import spock.lang.Unroll
 import wooga.gradle.unity.UnityPlugin
@@ -216,15 +215,15 @@ class UvmCheckInstalltionIntegrationSpec extends IntegrationSpec {
         new File(projectDir, installPath).deleteDir()
 
         where:
-        platform  | editorVersion       | buildTarget           | expectedComponents
-        ""        | unityTestVersion()  | BuildTarget.android   | [Component.android]
-        ""        | unityTestVersion()  | BuildTarget.ios       | [Component.ios]
-        ""        | unityTestVersion()  | BuildTarget.win64     | [Component.windowsMono]
-        "linux"   | unityTestVersion()  | BuildTarget.linux64   | [Component.linuxIL2CPP]
-        "linux"   | unityTestVersion()  | BuildTarget.osx       | [Component.macMono]
-        "mac os"  | "2018.4.30f1"       | BuildTarget.linux     | [Component.linux]
-        "mac os"  | unityTestVersion()  | BuildTarget.linux64   | [Component.linuxMono, Component.linuxIL2CPP]
-        "mac os"  | unityTestVersion()  | BuildTarget.osx       | [Component.macMono, Component.macIL2CPP]
+        platform | editorVersion      | buildTarget         | expectedComponents
+        ""       | unityTestVersion() | BuildTarget.android | [Component.android]
+        ""       | unityTestVersion() | BuildTarget.ios     | [Component.ios]
+        ""       | unityTestVersion() | BuildTarget.win64   | [Component.windowsMono]
+        "linux"  | unityTestVersion() | BuildTarget.linux64 | [Component.linuxIL2CPP]
+        "linux"  | unityTestVersion() | BuildTarget.osx     | [Component.macMono]
+        "mac os" | "2018.4.30f1"      | BuildTarget.linux   | [Component.linux]
+        "mac os" | unityTestVersion() | BuildTarget.linux64 | [Component.linuxMono, Component.linuxIL2CPP]
+        "mac os" | unityTestVersion() | BuildTarget.osx     | [Component.macMono, Component.macIL2CPP]
 
         installPath = "build/unity_installations/${editorVersion}"
         baseVersion = preInstalledUnity2019_4_31f1
@@ -238,7 +237,7 @@ class UvmCheckInstalltionIntegrationSpec extends IntegrationSpec {
 
         and: "make sure version is not installed"
         def i = UnityVersionManager.locateUnityInstallation(editorVersion)
-        if(i) {
+        if (i) {
             i.location.deleteDir()
         }
 
@@ -305,7 +304,7 @@ class UvmCheckInstalltionIntegrationSpec extends IntegrationSpec {
 
         and: "make sure version is not installed"
         def i = UnityVersionManager.locateUnityInstallation(editorVersion)
-        if(i) {
+        if (i) {
             i.location.deleteDir()
         }
 
@@ -338,5 +337,131 @@ class UvmCheckInstalltionIntegrationSpec extends IntegrationSpec {
         buildTarget1 = BuildTarget.ios
         buildTarget2 = BuildTarget.android
         expectedComponent = Component.ios
+    }
+
+    @Unroll("doesn't install components not compatible with #os platform")
+    def "task :checkUnityInstallation doesn't install components incompatible with current platform"() {
+        given: "A project with a mocked unity version"
+        unityProject.setProjectVersion(editorVersion)
+
+        and: "version switch and install enabled"
+        buildFile << """
+        uvm.autoSwitchUnityEditor = true
+        uvm.autoInstallUnityEditor = true
+        """.stripIndent()
+
+        and: "and a custom set unity path no matching project version"
+        buildFile << """
+        unity.unityPath = file("${baseVersion.executable.absolutePath}")
+        """.stripIndent()
+
+        and: "make sure version is not installed"
+        def i = UnityVersionManager.locateUnityInstallation(editorVersion)
+        if (i) {
+            i.location.deleteDir()
+        }
+
+        and: "and a unity installation without components"
+        def installation = UnityVersionManager.installUnityEditor(editorVersion, new File(projectDir, installPath))
+        assert installation
+
+        and: "multiple configured build targets in unity tasks"
+        buildFile << """
+            import net.wooga.uvm.Component
+            checkUnityInstallation {
+                ${componentsToInstall.collect { "buildRequiredUnityComponents.add(Component.$it)" }.join("\n")}
+            }
+        """
+
+        when:
+        runTasksSuccessfully("customUnity")
+
+        then:
+        println(installation.components)
+        expectedComponents.every {
+            installation.components.contains(Component.valueOf(it))
+        }
+        (!notExpectedComponents.every {
+            installation.components.contains(Component.valueOf(it))
+        }) || notExpectedComponents.isEmpty()
+
+        where:
+        os = isWindows() ? "windows" :
+             isMac() ? "macOS" :
+             isLinux() ? "linux" :
+             null
+        editorVersion = unityTestVersion()
+        baseVersion = preInstalledUnity2019_4_31f1
+        installPath = "build/unity_installations/${editorVersion}"
+        componentsToInstall = ["linuxMono", "macMono", "windowsMono"]
+        expectedComponents =
+                isWindows() ? ["linuxMono", "macMono"] :
+                isMac() ? ["linuxMono", "windowsMono"] :
+                isLinux() ? ["windowsMono", "macMono"] :
+                null
+
+        notExpectedComponents =
+                isWindows() ? ["windowsMono"] :
+                isMac() ? ["macMono"] :
+                isLinux() ? [] : //linuxMono comes as a component from UVM
+                null
+    }
+
+    @IgnoreIf({!os.macOs})
+    @Unroll
+    def "doesn't install ignorable components"() {
+        given: "A project with a mocked unity version"
+        unityProject.setProjectVersion(editorVersion)
+
+        and: "version switch and install enabled"
+        buildFile << """
+        uvm.autoSwitchUnityEditor = true
+        uvm.autoInstallUnityEditor = true
+        """.stripIndent()
+
+        and: "and a custom set unity path no matching project version"
+        buildFile << """
+        unity.unityPath = file("${baseVersion.executable.absolutePath}")
+        """.stripIndent()
+
+        and: "make sure version is not installed"
+        def i = UnityVersionManager.locateUnityInstallation(editorVersion)
+        if (i) {
+            i.location.deleteDir()
+        }
+
+        and: "and a unity installation without components"
+        def installation = UnityVersionManager.installUnityEditor(editorVersion, new File(projectDir, installPath))
+        assert installation
+
+        and: "multiple configured build targets in unity tasks"
+        buildFile << """
+            import net.wooga.uvm.Component
+            checkUnityInstallation {
+                ${ignorableComponents != null? "ignorableUnityComponents = [${ignorableComponents.collect{"Component.$it"}.join(",")}]": ""}
+                ${componentsToInstall.collect { "buildRequiredUnityComponents.add(Component.$it)" }.join("\n")}
+            }
+        """
+
+        when:
+        runTasksSuccessfully("customUnity")
+
+        then:
+        expectedComponents.every {
+            installation.components.contains(Component.valueOf(it))
+        }
+        (!notExpectedComponents.every {
+            installation.components.contains(Component.valueOf(it))
+        }) || notExpectedComponents.size() == 0
+
+        where: //macMono component is not available on macOs
+        ignorableComponents | componentsToInstall               | expectedComponents           | notExpectedComponents
+        null                | ["macMono", "windowsMono"]        | ["windowsMono"]              | ["macMono"]
+        ["android", "ios"]  | ["linuxMono", "windowsMono"]      | ["linuxMono", "windowsMono"] | []
+        ["ios", "macMono"]  | ["ios", "macMono", "windowsMono"] | ["ios", "windowsMono"]       | ["macMono"]
+        os = "macOs"
+        editorVersion = unityTestVersion()
+        baseVersion = preInstalledUnity2019_4_31f1
+        installPath = "build/unity_installations/${editorVersion}"
     }
 }
