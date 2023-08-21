@@ -21,6 +21,7 @@ import groovy.io.GroovyPrintStream
 import net.wooga.uvm.UnityVersionManager
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.internal.provider.ProviderInternal
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Console
 import org.gradle.api.tasks.Internal
@@ -55,6 +56,7 @@ class UvmListInstallations extends DefaultTask {
     @OutputFile
     final RegularFileProperty outputFile
 
+
     @Internal
     final Provider<PrintStream> outputPrintStream
 
@@ -62,11 +64,13 @@ class UvmListInstallations extends DefaultTask {
         super()
         this.outputs.upToDateWhen({ false })
         this.outputFile = project.objects.fileProperty()
-        this.outputPrintStream = project.provider({
-            this.outputFile.map({
-                new GroovyPrintStream(it.asFile) as PrintStream
-            }).getOrElse(System.out)
-        })
+
+        //Needs this whole wrapping to go around gradle limitations for @OutputFile.
+        this.outputPrintStream = project.provider {
+            ((Provider)outputFile).getOrNull()
+        }.map({
+            new GroovyPrintStream(it.asFile) as PrintStream
+        }).orElse(System.out)
     }
 
     @TaskAction
