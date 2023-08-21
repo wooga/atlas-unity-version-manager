@@ -226,7 +226,7 @@ class UnityVersionManagerPlugin implements Plugin<Project> {
         components
     }
 
-    private static class BuildTargetToComponents implements Transformer<List<Component>, String> {
+    static class BuildTargetToComponents implements Transformer<List<Component>, String> {
         private Provider<String> version
 
         static Provider<List<Component>> buildTargetToComponents(Provider<String> buildTarget, Provider<String> version) {
