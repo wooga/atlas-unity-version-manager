@@ -28,6 +28,7 @@ import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.provider.SetProperty
 import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.TaskAction
@@ -125,7 +126,7 @@ class UvmCheckInstallation extends DefaultTask implements BaseSpec {
 
     private final DirectoryProperty unityInstallBaseDir = objects.directoryProperty()
 
-    @Input
+    @InputDirectory
     DirectoryProperty getUnityInstallBaseDir() {
         unityInstallBaseDir
     }
