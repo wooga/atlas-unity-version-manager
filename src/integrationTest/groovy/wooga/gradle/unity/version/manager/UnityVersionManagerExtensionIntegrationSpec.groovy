@@ -23,6 +23,7 @@ import org.junit.Rule
 import spock.lang.Shared
 import spock.lang.Unroll
 import wooga.gradle.unity.UnityPlugin
+import wooga.gradle.unity.UnityTask
 import wooga.gradle.unity.tasks.Unity
 
 class UnityVersionManagerExtensionIntegrationSpec extends IntegrationSpec {
@@ -157,33 +158,34 @@ class UnityVersionManagerExtensionIntegrationSpec extends IntegrationSpec {
     def "has provider object resolve unity components"() {
         given: "a project with atlas-unity applied"
         buildFile << """
-            ${applyPlugin(UnityPlugin)}
             
             uvm {
                 unityVersion = "${defaultProjectVersion}"
             }
 
-            def componentsProvider = uvm.buildRequiredUnityComponents
-
-            task(customUnityIos, type: ${Unity.name}) {
+            tasks.register('customUnityIos', ${Unity.name}) {
                 buildTarget = 'ios'
             }
             
-            task(customUnityAndroid, type: ${Unity.name}) {
+            tasks.register('customUnityAndroid', ${Unity.name}) {
                 buildTarget = 'android'
             }
             
-            task(customUnityWebGl, type: ${Unity.name}) {
+            tasks.register('customUnityWebGl', ${Unity.name}) {
                 buildTarget = 'webGl'
             }
             
             [customUnityIos, customUnityAndroid, customUnityWebGl].each {it.actions = []}
             
-            task(printComponents) {                
-                println("print during task configuration: " + componentsProvider.get().sort())
-                                
+            import static wooga.gradle.unity.version.manager.UnityVersionManagerPlugin.BuildTargetToComponents.buildTargetToComponents
+            
+            tasks.register('printComponents') {
+                def allComponents = project.tasks.withType(wooga.gradle.unity.UnityTask).collect({
+                    buildTargetToComponents(it.buildTarget, uvm.unityVersion).getOrNull()
+                }).findAll{it != null}.flatten()
+                println("print during task configuration: " + allComponents.sort())    
                 doLast {
-                    println("print during task execution: " + componentsProvider.get().sort())
+                    println("print during task execution: " + uvm.buildRequiredUnityComponents.get().sort())
                 }
             }
         """.stripIndent()
