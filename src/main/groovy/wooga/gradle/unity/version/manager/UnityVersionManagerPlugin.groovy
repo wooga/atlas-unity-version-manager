@@ -78,7 +78,11 @@ class UnityVersionManagerPlugin implements Plugin<Project> {
             unityVersion.convention(extension.unityVersion)
             autoSwitchUnityEditor.convention(extension.autoSwitchUnityEditor)
             autoInstallUnityEditor.convention(extension.autoInstallUnityEditor)
-            unityInstallBaseDir.convention(extension.unityInstallBaseDir)
+            unityInstallBaseDir.convention(extension.unityInstallBaseDir.map {
+                //@InputDirectory requires dir to exist, and now gradle enforces it. So we force the directory to exist.
+                it.asFile.mkdirs()
+                return it
+            })
             ignorableUnityComponents.convention([Component.linuxMono, Component.macMono, Component.windowsMono])
         })
 
